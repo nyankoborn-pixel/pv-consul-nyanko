@@ -13,7 +13,6 @@ def load_character(config_path: str = "config/character.yml") -> dict:
 
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
-    max_chars = character["max_chars"]
     
     prompt = f"""あなたは「{char['name']}」というキャラクターです。
 以下のキャラ設定を厳密に守って、PVニュースのポストを日本語で生成してください。
@@ -27,12 +26,12 @@ def build_prompt(entry: dict, character: dict) -> str:
 - 禁止事項:
 {chr(10).join(f"  - {f}" for f in char['forbidden'])}
 
-【厳守すべき制約 - 極めて重要】
+【厳守すべき制約】
 1. 原文に書かれていない固有名詞・企業名・製品名・数値・日付を絶対に使用しないこと
 2. 原文から推測できない解釈や予測を述べないこと
 3. 医療アドバイス・投資判断に関わる表現は避けること
 4. 断定を避け、「〜とのこと」「〜と報告されています」「〜と発表されました」を用いること
-5. 文字数制限(厳守): summaryは120字以内、commentaryは50字以内。合計170字以内に必ず収めてください
+5. 文字数: summaryは100字以内、commentaryは40字以内を目安
 6. 出力は以下のJSON形式のみ。前後に説明文を付けないこと
 
 【出力形式】
@@ -121,14 +120,31 @@ def select_hashtags(entry: dict, character: dict) -> list:
 
 
 def compose_post(entry: dict, gen: dict, character: dict) -> str:
-    """最終的な投稿文を組み立て(ソースURL付き)"""
+    """
+    最終的な投稿文を組み立て。
+    X上限の280字を数学的に保証するため、はみ出した分はsummaryを自動で切り詰める。
+    """
     tags = select_hashtags(entry, character)
     hashtags_str = " ".join(tags)
-    
     link = entry.get("link", "").strip()
-    if link:
-        post = f"{gen['summary']}\n\n🐾 {gen['commentary']}\n\n{hashtags_str}\n{link}"
-    else:
-        post = f"{gen['summary']}\n\n🐾 {gen['commentary']}\n\n{hashtags_str}"
+    commentary = gen["commentary"]
+    summary = gen["summary"]
     
+    # t.co短縮後、URLは固定23字としてカウントされるため実URLは長くても280字制約上は23字扱い
+    # ただしvalidate.pyはlen(post)で判定するので、ここではURLの実長で計算する
+    url_part = f"\n{link}" if link else ""
+    fixed_part = f"\n\n🐾 {commentary}\n\n{hashtags_str}{url_part}"
+    
+    # 上限280字から固定部分を引いた分がsummaryに使える文字数
+    max_total = character.get("max_chars", 278)
+    allowed_summary = max_total - len(fixed_part)
+    
+    # 余裕がなければ切り詰め(末尾を「…」に)
+    if len(summary) > allowed_summary:
+        if allowed_summary > 1:
+            summary = summary[:allowed_summary - 1] + "…"
+        else:
+            summary = ""  # 極端なケース(commentary+tags+urlだけで既にオーバー)
+    
+    post = f"{summary}{fixed_part}"
     return post
