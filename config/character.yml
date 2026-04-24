@@ -46,7 +46,7 @@ hashtags:
     pmda: ["#PMDA"]
 
 # 文字数上限(Xの仕様 = 280字、日本語は1文字1カウント)
-max_chars: 270  # 余裕を持たせる
+max_chars: 278  # 余裕を持たせる
 
 # AI生成明示(倫理・X規約対応)
 ai_disclosure: "#AI生成"
