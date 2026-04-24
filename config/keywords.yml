@@ -1,0 +1,99 @@
+# 話題性スコアリング用キーワード重み
+# タイトル+要約内の出現をチェック(大文字小文字無視)
+
+high_impact:
+  # 安全性関連
+  - keyword: "safety signal"
+    weight: 8
+  - keyword: "signal detection"
+    weight: 7
+  - keyword: "adverse event"
+    weight: 6
+  - keyword: "adverse reaction"
+    weight: 6
+  - keyword: "black box warning"
+    weight: 9
+  - keyword: "boxed warning"
+    weight: 9
+  - keyword: "recall"
+    weight: 9
+  - keyword: "withdrawal"
+    weight: 8
+  - keyword: "suspension"
+    weight: 8
+  - keyword: "warning letter"
+    weight: 7
+  
+  # 規制アクション
+  - keyword: "FDA approval"
+    weight: 7
+  - keyword: "EMA approval"
+    weight: 7
+  - keyword: "guidance"
+    weight: 6
+  - keyword: "guideline"
+    weight: 6
+  - keyword: "draft guidance"
+    weight: 7
+  - keyword: "CIOMS"
+    weight: 7
+  - keyword: "ICH"
+    weight: 6
+  
+  # AI/技術関連(PVコンサルタントの関心領域)
+  - keyword: "artificial intelligence"
+    weight: 8
+  - keyword: "machine learning"
+    weight: 7
+  - keyword: "AI"
+    weight: 7
+  - keyword: "LLM"
+    weight: 8
+  - keyword: "generative AI"
+    weight: 8
+  - keyword: "pharmacovigilance"
+    weight: 8
+  - keyword: "ICSR"
+    weight: 8
+  - keyword: "case processing"
+    weight: 6
+  - keyword: "signal management"
+    weight: 7
+  
+  # システム・ベンダー
+  - keyword: "Argus"
+    weight: 7
+  - keyword: "ArisGlobal"
+    weight: 7
+  - keyword: "Veeva"
+    weight: 6
+  - keyword: "LifeSphere"
+    weight: 6
+  
+  # コンプライアンス
+  - keyword: "GVP"
+    weight: 6
+  - keyword: "GCP"
+    weight: 5
+  - keyword: "Good Pharmacovigilance"
+    weight: 7
+  - keyword: "Part 11"
+    weight: 6
+  - keyword: "21 CFR"
+    weight: 6
+  
+  # 日本語キーワード(PMDA用)
+  - keyword: "医薬品安全性"
+    weight: 8
+  - keyword: "副作用"
+    weight: 7
+  - keyword: "回収"
+    weight: 8
+  - keyword: "使用上の注意"
+    weight: 7
+  - keyword: "緊急安全性情報"
+    weight: 10
+  - keyword: "ファーマコビジランス"
+    weight: 8
+  - keyword: "市販後調査"
+    weight: 6

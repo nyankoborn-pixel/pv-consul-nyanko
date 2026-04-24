@@ -1,0 +1,40 @@
+# PVニュースソース設定 - 一次情報・信頼できるメディアのみ
+sources:
+  # FDA (米国食品医薬品局)
+  - name: "FDA Drug Safety"
+    url: "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/drug-safety-podcasts/rss.xml"
+    weight: 10
+    category: "regulatory_primary"
+  - name: "FDA Press Announcements"
+    url: "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-announcements/rss.xml"
+    weight: 10
+    category: "regulatory_primary"
+  - name: "FDA Recalls"
+    url: "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/recalls/rss.xml"
+    weight: 9
+    category: "regulatory_primary"
+  
+  # EMA (欧州医薬品庁)
+  - name: "EMA News"
+    url: "https://www.ema.europa.eu/en/rss.xml"
+    weight: 10
+    category: "regulatory_primary"
+  
+  # PMDA (医薬品医療機器総合機構)
+  - name: "PMDA 安全性情報"
+    url: "https://www.pmda.go.jp/rss/kinkyu_anzen.rss"
+    weight: 10
+    category: "regulatory_primary"
+  
+  # RAPS (Regulatory Affairs Professionals Society)
+  - name: "RAPS Regulatory Focus"
+    url: "https://www.raps.org/rss/news-articles"
+    weight: 7
+    category: "regulatory_media"
+  
+  # PubMed (PV関連論文)
+  - name: "PubMed Pharmacovigilance"
+    url: "https://pubmed.ncbi.nlm.nih.gov/rss/search/1zX_QhvL7rFHCAGNmaVxRnx5K9tYjZ_0n5Vx5cKfUC8OaFKpCe/?limit=15&utm_campaign=pubmed-2&fc=20240101000000"
+    weight: 6
+    category: "academic"
+    fallback_query: "pharmacovigilance"
