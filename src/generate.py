@@ -73,7 +73,7 @@ def generate_post_content(entry: dict, character: dict) -> dict:
     
     # Gemini 2.0 Flash (無料枠利用可能)
     model = genai.GenerativeModel(
-        "gemini-2.0-flash-exp",
+        "gemini-2.5-flash",
         generation_config={
             "temperature": 0.4,  # 低めで安定した出力
             "top_p": 0.9,
