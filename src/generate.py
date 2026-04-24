@@ -1,6 +1,5 @@
 """
 generate.py - Gemini Flash を使ってコンサルにゃんこ口調でポスト生成
-防御策: 原文に含まれない固有名詞の使用を禁止するプロンプト設計
 """
 import os
 import yaml
@@ -13,12 +12,6 @@ def load_character(config_path: str = "config/character.yml") -> dict:
 
 
 def build_prompt(entry: dict, character: dict) -> str:
-    """
-    厳格なガードレール付きプロンプト
-    - 原文にない固有名詞・数字を生成しない
-    - キャラトーンを厳守
-    - 文字数制限を明示
-    """
     char = character["character"]
     max_chars = character["max_chars"]
     
@@ -60,16 +53,12 @@ commentary には必ず口ぐせ「{char['catchphrase']}」の世界観を感じ
 
 
 def generate_post_content(entry: dict, character: dict) -> dict:
-    """
-    Gemini FlashでJSON形式のポスト内容を生成
-    """
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY environment variable is not set")
     
     genai.configure(api_key=api_key)
     
-    # Gemini 2.5 Flash (無料枠利用可能)
     model = genai.GenerativeModel(
         "gemini-2.5-flash",
         generation_config={
@@ -81,11 +70,9 @@ def generate_post_content(entry: dict, character: dict) -> dict:
     )
     
     prompt = build_prompt(entry, character)
-    
     response = model.generate_content(prompt)
     text = response.text.strip()
     
-    # JSON抽出
     import json
     import re
     text = re.sub(r"^```(?:json)?\s*", "", text)
@@ -103,7 +90,6 @@ def generate_post_content(entry: dict, character: dict) -> dict:
 
 
 def select_hashtags(entry: dict, character: dict) -> list:
-    """マッチしたキーワードに応じて動的にハッシュタグを選定"""
     hashtags_config = character["hashtags"]
     tags = list(hashtags_config["always"])
     
@@ -112,15 +98,37 @@ def select_hashtags(entry: dict, character: dict) -> list:
     
     if any(x in text for x in ["ai", "artificial intelligence", "machine learning", "llm"]):
         tags.extend(hashtags_config["conditional"]["ai"][:1])
-    
     if any(x in matched_lower for x in ["guidance", "guideline", "fda approval", "ema approval", "ich"]):
         tags.extend(hashtags_config["conditional"]["regulatory"][:1])
-    
     if "signal" in text:
         tags.extend(hashtags_config["conditional"]["signal"][:1])
-    
     if "icsr" in text:
         tags.extend(hashtags_config["conditional"]["icsr"][:1])
-    
     if "pmda" in entry["source_name"].lower() or "pmda" in text:
-        tags.extend
+        tags.extend(hashtags_config["conditional"]["pmda"][:1])
+    
+    seen = set()
+    unique_tags = []
+    for t in tags:
+        if t not in seen:
+            seen.add(t)
+            unique_tags.append(t)
+        if len(unique_tags) >= 4:
+            break
+    
+    unique_tags.append(character["ai_disclosure"])
+    return unique_tags
+
+
+def compose_post(entry: dict, gen: dict, character: dict) -> str:
+    """最終的な投稿文を組み立て(ソースURL付き)"""
+    tags = select_hashtags(entry, character)
+    hashtags_str = " ".join(tags)
+    
+    link = entry.get("link", "").strip()
+    if link:
+        post = f"{gen['summary']}\n\n🐾 {gen['commentary']}\n\n{hashtags_str}\n{link}"
+    else:
+        post = f"{gen['summary']}\n\n🐾 {gen['commentary']}\n\n{hashtags_str}"
+    
+    return post
