@@ -77,7 +77,7 @@ def generate_post_content(entry: dict, character: dict) -> dict:
         generation_config={
             "temperature": 0.4,  # 低めで安定した出力
             "top_p": 0.9,
-            "max_output_tokens": 500,
+            "max_output_tokens": 2000,
             "response_mime_type": "application/json",
         },
     )
