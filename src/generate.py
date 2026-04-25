@@ -43,50 +43,68 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: ルパン三世風アニメ + 妖艶演出(圧縮・統一版)
-    全カテゴリ共通(カテゴリ別の差を廃止して指示を明確化)
+    画像スタイル: 1980年代OVA / 劇場版アニメ作画
+    押井守『うる星やつら2 ビューティフル・ドリーマー』、ヤマト2199、
+    パトレイバー、カウボーイビバップ系の高品質セルアニメ作画
     """
     return """
-STYLE: Classic Lupin III cel anime (Monkey Punch / TMS Entertainment, 
-1970s-1990s era). Bold black ink lines, flat cel color shading, 
-dramatic exaggerated highlights and shadows. NOT photorealistic, 
-NOT 3D, NOT modern anime (Demon Slayer / Jujutsu Kaisen), NOT kawaii.
+STYLE: 1980s Japanese theatrical OVA anime, Mamoru Oshii era 
+"Urusei Yatsura 2: Beautiful Dreamer" (1984), Studio Pierrot / 
+Sunrise / Madhouse golden age. Hand-drawn cel animation with 
+high-quality pencil work. Detailed shading with multiple cel-shadow 
+layers. Painterly background art. Mature adult-anime aesthetic — 
+NOT moe, NOT chibi, NOT modern anime (Demon Slayer / Jujutsu Kaisen 
+era), NOT photorealistic, NOT 3D.
 
-COMPOSITION (mandatory, never compromise):
-- LOW ANGLE shot from below the subject's hips, looking up at her
-- FULL BODY shot from head to high-heeled feet, subject occupies 
-  50-70% of vertical canvas
-- DYNAMIC S-CURVE pose: mid-stride walking, turning over shoulder, 
-  or hip-shifted standing with body twist
-- NEVER static pose with both feet together, NEVER bust-up framing, 
-  NEVER seated
+SUBJECT: A single mature East Asian woman, age 28-38. Stylized 
+1980s anime face — slightly almond-shaped intelligent eyes (NOT 
+oversized), refined nose, soft expressive mouth. Long flowing dark 
+hair with detailed strand work. Confident half-smile or knowing 
+sultry expression. Adult sophisticated proportions. NEVER child-like 
+big eyes, NEVER moe style, NEVER chibi.
 
-SUBJECT: A single mature East Asian woman, age 28-38. Long hair 
-flowing in motion. Sharp intelligent eyes, confident half-smile or 
-sultry knowing smirk. Adult proportions (NOT child-like, NOT kawaii, 
-NOT chibi). Original character only — NEVER Lupin III copyrighted 
-characters (Fujiko, Lupin, Jigen, Goemon, Zenigata).
+COMPOSITION: 3/4 view or front-facing portrait composition where 
+her face occupies 20-30% of canvas (face must be prominent and 
+clearly drawn). Show torso and at least to the hips, ideally full 
+body if pose allows. Dynamic angle — slight tilt, looking back over 
+shoulder, or leaning with attitude. NEVER flat headshot, NEVER pure 
+profile (side view), NEVER faceless silhouette.
 
-WARDROBE: Glossy black or deep red bodycon dress with high thigh 
-slit on one leg, satin or vinyl sheen finish. Statement high heels 
-with ankle straps. Large drop earrings. NEVER business suits, 
-NEVER lab coats, NEVER trench coats, NEVER conservative covered 
-clothing.
+POSE & EXPRESSION: Confident, knowing, sultry — but with the 
+emotional depth of 80s anime (intelligence, mystery, slight 
+melancholy). Eye contact with viewer or thoughtful gaze off-camera. 
+Lips slightly curved in a knowing smile.
 
-LIGHTING: Strong NEON BACKLIGHT from behind — vivid magenta, hot 
-pink, electric blue, or crimson. Backlight brighter than fill, 
-creating intense rim light on her hair, shoulders, and silhouette. 
-NEVER daylight, NEVER flat studio light.
+WARDROBE: Stylish 1980s anime fashion — could be a sleek dress, 
+sharp suit jacket over silk blouse, or sophisticated casual outfit. 
+Natural color palette with one bold accent. Should feel adult and 
+elegant, not childish.
 
-SETTING: Neon-lit nighttime city — vertical neon signs in background 
-(no readable text, just shapes and colors), wet glossy reflections 
-on the ground capturing colored light, atmospheric haze for cinematic 
-depth.
+LIGHTING: Cinematic mood lighting — could be golden hour through 
+windows, neon city night, soft indoor lamp light, or atmospheric 
+twilight. Use multiple light sources creating depth. Strong cel 
+highlights on hair (signature 80s anime hair-shine). NOT flat, 
+NOT overly dark.
+
+BACKGROUND: Detailed painterly background art (Yoshinori Kanada / 
+Hiroshi Ono / Mamoru Oshii style) — atmospheric Tokyo cityscape at 
+dusk/night, sophisticated interior, library, observatory, or 
+moody architectural space. Background should feel rich and lived-in, 
+contributing to the cinematic mood.
 
 ABSOLUTE PROHIBITIONS:
-- Lupin III copyrighted characters
+- Modern anime style (Demon Slayer, Jujutsu Kaisen, Naruto era)
+- Moe, kawaii, chibi, child-like proportions, oversized eyes
+- Photorealistic rendering or 3D CGI
+- Western painted comic styles (Alex Ross, Marvel)
+- Minimalist line art or flat vector
+- Recognizable copyrighted characters from any anime
+- Static both-feet-together poses, pure side profiles, faceless silhouettes
+- Daylight studio shots, empty white backgrounds
+- Text, letters, numbers, logos, readable signage in image
+- Nudity, transparent clothing, exposed nipples or genitals
+- Subjects appearing under 25 years old
 """.strip()
-
 
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
