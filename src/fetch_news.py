@@ -5,7 +5,7 @@ import feedparser
 import yaml
 import time
 import requests
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from dateutil import parser as date_parser
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
@@ -26,9 +26,11 @@ def parse_entry_date(entry) -> datetime:
     return datetime.now(timezone.utc)
 
 
-def fetch_all_sources(max_age_hours: int = 168) -> list:
+def fetch_all_sources(max_age_hours: int = 168, top_n: int = 10) -> list:
+    """
+    各ソースから新着順 top_n 件を取得。日付フィルタは補助的にのみ適用。
+    """
     sources = load_sources()
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
     all_entries = []
     
     for source in sources:
@@ -39,16 +41,14 @@ def fetch_all_sources(max_age_hours: int = 168) -> list:
             raw = len(feed.entries)
             
             kept = 0
-            for entry in feed.entries[:20]:
-                published = parse_entry_date(entry)
-                if published < cutoff:
-                    continue
+            # 新着順top_n件だけ採用(日付フィルタなし)
+            for entry in feed.entries[:top_n]:
                 summary = entry.get("summary", "") or entry.get("description", "")
                 all_entries.append({
                     "title": entry.get("title", "").strip(),
                     "summary": summary.strip()[:1500],
                     "link": entry.get("link", ""),
-                    "published": published.isoformat(),
+                    "published": parse_entry_date(entry).isoformat(),
                     "source_name": source["name"],
                     "source_weight": source["weight"],
                     "source_category": source["category"],
