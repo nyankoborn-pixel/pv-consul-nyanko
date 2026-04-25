@@ -15,8 +15,6 @@ from dateutil import parser as date_parser
 
 POSTED_LOG = Path("logs/posted.jsonl")
 
-# summary がこの文字数未満の記事は「リード文しか取得できなかった」と判断して除外
-# 会員限定記事の事故的な引用を防ぐ
 MIN_SUMMARY_LENGTH = 100
 
 
@@ -27,7 +25,6 @@ def load_keywords(config_path: str = "config/keywords.yml") -> list:
 
 
 def load_posted_links() -> set:
-    """過去に投稿済みの記事リンクを集合で返す(重複防止)"""
     if not POSTED_LOG.exists():
         return set()
     links = set()
@@ -43,42 +40,27 @@ def load_posted_links() -> set:
 
 
 def calculate_keyword_score(text: str, keywords: list) -> tuple:
-    """
-    キーワード重みを合算してスコア計算
-    マイナス重みは「除外信号」として機能(合計に含める)
-    Returns: (score, matched_keywords)
-    """
     text_lower = text.lower()
     score = 0.0
     matched = []
-    
     for entry in keywords:
         keyword = entry["keyword"]
         weight = entry["weight"]
-        
         if keyword.lower() in text_lower:
             score += weight
             matched.append(keyword)
-    
     return score, matched
 
 
 def calculate_recency_bonus(published_str: str) -> tuple:
-    """
-    記事の新しさによる補正
-    Returns: (bonus_score, age_label)
-    """
     if not published_str:
         return -10.0, "日付不明"
-    
     try:
         published = date_parser.parse(published_str)
         if published.tzinfo is None:
             published = published.replace(tzinfo=timezone.utc)
-        
         now = datetime.now(timezone.utc)
         age_days = (now - published).days
-        
         if age_days <= 7:
             return 5.0, f"{age_days}日前(新鮮)"
         elif age_days <= 30:
@@ -89,16 +71,11 @@ def calculate_recency_bonus(published_str: str) -> tuple:
             return -15.0, f"{age_days}日前(古い)"
         else:
             return -30.0, f"{age_days}日前(実質除外)"
-    
-    except (ValueError, TypeError) as e:
-        return -10.0, f"日付パース失敗"
+    except (ValueError, TypeError):
+        return -10.0, "日付パース失敗"
 
 
 def is_summary_too_short(entry: dict) -> bool:
-    """
-    summary が短すぎる(会員限定記事のリード文のみ等)かを判定
-    タイトル+要約の合計が MIN_SUMMARY_LENGTH 未満なら、要約に十分な情報がないと判断
-    """
     title = entry.get("title", "")
     summary = entry.get("summary", "")
     combined = f"{title} {summary}".strip()
@@ -106,15 +83,9 @@ def is_summary_too_short(entry: dict) -> bool:
 
 
 def score_entries(entries: list, config_path: str = "config/keywords.yml") -> list:
-    """
-    エントリ一覧をスコアリングして降順ソートで返す。
-    マイナススコアの記事は除外。
-    過去投稿済みの記事も除外。
-    summary が短すぎる記事も除外(ハルシネーション防止)。
-    """
     keywords = load_keywords(config_path)
     posted_links = load_posted_links()
-    
+
     scored = []
     excluded_count = {
         "posted": 0,
@@ -122,43 +93,34 @@ def score_entries(entries: list, config_path: str = "config/keywords.yml") -> li
         "too_old": 0,
         "too_short": 0,
     }
-    
+
     for entry in entries:
-        # 重複チェック
         link = entry.get("link", "")
         if link in posted_links:
             excluded_count["posted"] += 1
             continue
-        
-        # summary が短すぎる(会員限定リード文等)→除外
+
         if is_summary_too_short(entry):
             excluded_count["too_short"] += 1
             continue
-        
-        # ソース重み
+
         source_weight = float(entry.get("source_weight", 5))
-        
-        # キーワードスコア
         text = f"{entry.get('title', '')} {entry.get('summary', '')}"
         kw_score, matched = calculate_keyword_score(text, keywords)
-        
-        # 日付補正
+
         published = entry.get("published", "")
         recency_bonus, age_label = calculate_recency_bonus(published)
-        
-        # 合計スコア
+
         total = source_weight + kw_score + recency_bonus
-        
-        # 経年で除外
+
         if recency_bonus <= -25:
             excluded_count["too_old"] += 1
             continue
-        
-        # マイナススコア(除外キーワード優位)で除外
+
         if total < 0:
             excluded_count["negative_score"] += 1
             continue
-        
+
         entry_scored = dict(entry)
         entry_scored["score"] = total
         entry_scored["source_weight"] = source_weight
@@ -167,9 +129,14 @@ def score_entries(entries: list, config_path: str = "config/keywords.yml") -> li
         entry_scored["matched_keywords"] = matched
         entry_scored["age_label"] = age_label
         scored.append(entry_scored)
-    
-    # スコア降順ソート
+
     scored.sort(key=lambda x: x["score"], reverse=True)
-    
+
     print(f"[score] Scored: {len(scored)} entries")
     print(f"[score] Excluded: posted={excluded_count['posted']}, negative_score={excluded_count['negative_score']}, too_old={excluded_count['too_old']}, too_short={excluded_count['too_short']}")
+
+    return scored
+
+
+if __name__ == "__main__":
+    print("score module loaded.")
