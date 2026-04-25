@@ -53,15 +53,11 @@ STYLE: 1980s Japanese theatrical OVA anime, Mamoru Oshii era
 Sunrise / Madhouse golden age. Hand-drawn cel animation with 
 high-quality pencil work. Detailed shading with multiple cel-shadow 
 layers. Painterly background art. Mature adult-anime aesthetic — 
-NOT moe, NOT chibi, NOT modern anime (Demon Slayer / Jujutsu Kaisen 
-era), NOT photorealistic, NOT 3D.
+NOT modern anime (Demon Slayer / Jujutsu Kaisen 
+era).
 
-SUBJECT: A single mature East Asian woman, age 28-38. Stylized 
-1980s anime face — slightly almond-shaped intelligent eyes (NOT 
-oversized), refined nose, soft expressive mouth. Long flowing dark 
-hair with detailed strand work. Confident half-smile or knowing 
-sultry expression. Adult sophisticated proportions. NEVER child-like 
-big eyes, NEVER moe style, NEVER chibi.
+East Asian woman.
+
 
 COMPOSITION: 3/4 view or front-facing portrait composition where 
 her face occupies 20-30% of canvas (face must be prominent and 
@@ -69,11 +65,6 @@ clearly drawn). Show torso and at least to the hips, ideally full
 body if pose allows. Dynamic angle — slight tilt, looking back over 
 shoulder, or leaning with attitude. NEVER flat headshot, NEVER pure 
 profile (side view), NEVER faceless silhouette.
-
-POSE & EXPRESSION: Confident, knowing, sultry — but with the 
-emotional depth of 80s anime (intelligence, mystery, slight 
-melancholy). Eye contact with viewer or thoughtful gaze off-camera. 
-Lips slightly curved in a knowing smile.
 
 WARDROBE: Stylish 1980s anime fashion — could be a sleek dress, 
 sharp suit jacket over silk blouse, or sophisticated casual outfit. 
@@ -94,16 +85,11 @@ contributing to the cinematic mood.
 
 ABSOLUTE PROHIBITIONS:
 - Modern anime style (Demon Slayer, Jujutsu Kaisen, Naruto era)
-- Moe, kawaii, chibi, child-like proportions, oversized eyes
-- Photorealistic rendering or 3D CGI
 - Western painted comic styles (Alex Ross, Marvel)
 - Minimalist line art or flat vector
-- Recognizable copyrighted characters from any anime
 - Static both-feet-together poses, pure side profiles, faceless silhouettes
 - Daylight studio shots, empty white backgrounds
 - Text, letters, numbers, logos, readable signage in image
-- Nudity, transparent clothing, exposed nipples or genitals
-- Subjects appearing under 25 years old
 """.strip()
 
 def build_prompt(entry: dict, character: dict) -> str:
