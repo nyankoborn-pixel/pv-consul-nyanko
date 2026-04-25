@@ -1,7 +1,7 @@
 """
 generate.py - Gemini で要約+画像プロンプト+画像を生成
 The Rundown AI 型: 親ポストに画像、自リプライにソースURL
-画像路線: Alex Ross 風アメコミ painted comic art
+画像路線: サイバーパンク的ネオン都市夜景 + 妖艶女性(添付参考画像準拠)
 PV関連性判定: 記事がPV/医薬品と無関係なら投稿スキップ
 """
 import os
@@ -43,188 +43,94 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: ハイパーリアル写真 + 妖艶演出フル投入版
-    視線・表情・衣装・ポーズ・メイクを最大限強化
+    画像スタイル: 添付参考画像準拠 — サイバーパンク的ネオン都市夜景 + 妖艶女性
+    Blade Runner 2049 / Cyberpunk 2077 / 攻殻機動隊実写版 / K-POP MV美学
+    全カテゴリ統一(カテゴリ別ブレを排除)
     """
-    common_style = (
-        "Style: Hyperrealistic cinematic photography, ultra-detailed, 8K "
-        "resolution, shot on a Sony A1 or Canon R5 with a 50mm f/1.2 or "
-        "85mm f/1.4 prime lens. Cinematic shallow depth of field with "
-        "gorgeous bokeh. Natural skin texture with fine pores, individual "
-        "hair strands, realistic luxurious fabric with sheen. Aesthetic: "
-        "high-fashion editorial photography meets film noir glamour — like "
-        "a Vogue cover, a James Bond film still, or a sophisticated "
-        "perfume advertisement. The image MUST be indistinguishable from "
-        "a real photograph. NOT illustration, NOT anime, NOT painted art, "
-        "NOT 3D rendering."
-    )
-    
-    composition_directive = (
-        "MANDATORY COMPOSITION (absolute, never compromise):\n"
-        "1. CAMERA ANGLE: LOW ANGLE shot from below the subject's waist, "
-        "looking up. The viewer feels they are looking up at her.\n"
-        "2. FRAMING: FULL BODY or 3/4 body shot showing legs and feet. "
-        "Subject occupies 40-60% of vertical canvas. NEVER bust-up, "
-        "NEVER headshot, NEVER seated at desk, NEVER waist-up only.\n"
-        "3. LIGHTING: STRONG RIM LIGHT from behind defining her silhouette "
-        "dramatically. Backlight should be brighter than fill light, "
-        "creating clear edge glow on her hair, shoulders, and arms. "
-        "Vibrant accent colored lights (neon magenta, electric blue, "
-        "amber, deep red) from background sources.\n"
-        "4. SURFACES: Wet-look glossy reflections on the floor capturing "
-        "the colored lights. Atmospheric haze for cinematic depth."
-    )
-    
-    expression_directive = (
-        "MANDATORY EXPRESSION (this is critical — never compromise):\n"
-        "She MUST look DIRECTLY AT THE CAMERA with a confident, sultry, "
-        "slightly seductive gaze. Eyes locked on the viewer with magnetic "
-        "intensity. Lips slightly parted, OR a subtle knowing smile, OR a "
-        "slight smirk of confident allure. Chin slightly lowered, eyes "
-        "looking up at the camera through her lashes — the classic "
-        "femme fatale gaze. NEVER looking away from camera, NEVER serious "
-        "business expression, NEVER focused on a task, NEVER neutral or "
-        "professional."
-    )
-    
-    pose_directive = (
-        "MANDATORY POSE (specific actions required):\n"
-        "Choose ONE of these specific glamorous poses (do not do generic "
-        "standing):\n"
-        "A) Hand on hip with weight shifted to one leg, hip prominently "
-        "out to the side creating dramatic S-curve\n"
-        "B) One hand touching her hair or running through it, the other "
-        "hand on her waist or hip\n"
-        "C) Arms slightly crossed below the bustline creating a confident "
-        "fashion-model stance, hip shifted\n"
-        "D) Mid-stride walking toward camera with one leg crossing the "
-        "other, hip rotation visible\n"
-        "E) Leaning against architecture (pillar, wall, bar) with hip "
-        "out, shoulder dropped, arm extended\n"
-        "Body language must read as confidently sensual — model-like, "
-        "magazine-cover-like. NEVER static military stance, NEVER both "
-        "feet flat together, NEVER hands hanging straight."
-    )
-    
-    wardrobe_directive = (
-        "MANDATORY WARDROBE (glamorous evening attire required):\n"
-        "Choose from: a slit evening gown showing one leg through a high "
-        "thigh slit, a satin/silk cocktail dress with elegant cut, an "
-        "off-shoulder structured dress, a backless sophisticated dress, "
-        "or a fitted bodycon dress with statement design. Fabric MUST "
-        "have visible sheen and luxurious quality (silk, satin, leather "
-        "accents). Statement neckline (tasteful V-neck or boat neck — "
-        "elegant, not vulgar). MUST show legs (slit, knee-length, or "
-        "shorter elegant cut). Statement high heels visible (stilettos, "
-        "ankle straps). NEVER trench coats, NEVER business suits, NEVER "
-        "covered-up office attire, NEVER lab coats. This is glamour-shoot "
-        "wardrobe, not office wardrobe."
-    )
-    
-    hair_makeup_directive = (
-        "MANDATORY HAIR & MAKEUP (full glamour required):\n"
-        "MAKEUP: Smoky eye makeup with defined eyeliner and dramatic "
-        "lashes. Defined contoured cheekbones. Bold lip color (deep red, "
-        "wine, nude-glossy, or rose). Dewy luminous skin finish. Editorial-"
-        "level makeup throughout — this is high-fashion glamour, NEVER "
-        "natural/no-makeup look. "
-        "HAIR: Voluminous styled hair — long flowing waves with movement, "
-        "an elegant updo with face-framing strands, or sleek-and-bold "
-        "modern style. Hair catches the rim light dramatically with "
-        "highlight reflections. NEVER simple ponytail, NEVER plain "
-        "office hair. "
-        "JEWELRY: Statement large earrings (chandelier or geometric "
-        "drops). Necklace catching the light. Optional sleek bracelet "
-        "or rings. Jewelry should sparkle and add visual interest."
-    )
-    
-    color_palette = (
-        "COLOR PALETTE: Black base with deep red, neon purple/magenta, "
-        "electric blue, metallic gold, dark navy. Cinematic noir grading. "
-        "Saturated accent lights against deep shadows."
-    )
-    
-    figure_directive = (
-        "SUBJECT: A single Japanese or East Asian woman, 28-40 years old. "
-        "International, mysterious, captivating presence — sophisticated "
-        "femme fatale or international agent vibe. Beautiful with "
-        "distinctive authentic features — NOT a generic AI beauty. "
-        "Mature sophisticated allure. Striking, magnetic, the kind of "
-        "presence that stops you mid-scroll."
-    )
-    
-    hard_forbidden = (
-        "ABSOLUTE PROHIBITIONS: "
-        "- Anime, manga, cartoon, illustration, painted, or 3D CGI styles "
-        "- Sitting at desk, working at computer, hunched over papers, "
-        "  bust-up framing, headshot framing, waist-up only framing "
-        "- Business suits, trench coats, lab coats, office attire "
-        "- Static/stationary poses with both feet together "
-        "- Looking away from camera or focused on tasks "
-        "- Serious/professional expression "
-        "- Multiple people in frame (single subject only) "
-        "- Real, identifiable celebrities, actresses, models, or public "
-        "  figures — face must be entirely original "
-        "- Recognizable Lupin III characters (Fujiko, Lupin, Jigen, "
-        "  Goemon, Zenigata) "
-        "- Full nudity or transparent clothing "
-        "- Subjects appearing under 28 years old "
-        "- Generic medical clichés (stethoscope, white coat, pills) "
-        "- Text, logos, or readable signage in the image"
-    )
-    
-    category_scenes = {
-        "regulatory": (
-            "Setting: a stately government building interior at night — "
-            "vast marble corridor with tall pillars, deep red carpet, "
-            "ornate chandelier overhead. Polished marble floor reflects "
-            "warm light. Atmospheric haze. She stands in this opulent "
-            "space looking absolutely out of place yet completely in command."
-        ),
-        "ai_tech": (
-            "Setting: an ultra-modern dark research environment with a "
-            "wall of large monitors displaying abstract data visualizations. "
-            "Monitors backlight her in cool electric blue and magenta. "
-            "Glossy floor reflects the colored lights. Glass and metal "
-            "architecture creates dramatic geometric backdrop."
-        ),
-        "market_business": (
-            "Setting: a high-floor luxurious Tokyo executive lounge or "
-            "hotel suite at night. Floor-to-ceiling windows show Tokyo "
-            "skyline with neon city lights creating bokeh. Strong backlight "
-            "from city lights creates dramatic rim around her silhouette. "
-            "Polished marble or wood floor reflects warm light. Maybe a "
-            "champagne flute on a nearby surface."
-        ),
-        "china": (
-            "Setting: a Shanghai or Hong Kong luxurious atmospheric "
-            "interior at night — Bund-area old-money hotel lobby, retro "
-            "art deco interior, or high-floor terrace overlooking Pudong "
-            "skyline. Warm amber lighting mixed with neon city glow. "
-            "Glossy reflective surfaces."
-        ),
-        "general": (
-            "Setting: an upscale atmospheric night setting — luxurious "
-            "lounge interior, marble corridor, rain-slick city street with "
-            "neon reflections, or glamorous penthouse. Strong rim lighting, "
-            "colored accent lights, glossy reflections."
-        ),
-    }
-    
-    scene = category_scenes.get(category, category_scenes["general"])
-    
-    return (
-        f"{common_style}\n\n"
-        f"{composition_directive}\n\n"
-        f"{expression_directive}\n\n"
-        f"{pose_directive}\n\n"
-        f"{wardrobe_directive}\n\n"
-        f"{hair_makeup_directive}\n\n"
-        f"{color_palette}\n\n"
-        f"{figure_directive}\n\n"
-        f"{scene}\n\n"
-        f"{hard_forbidden}"
-    )
+    return """
+Style: Hyperrealistic cyberpunk fashion editorial photography, 
+ultra-detailed, 8K resolution. Aesthetic: a fusion of Blade Runner 2049, 
+Cyberpunk 2077 cinematic shots, Ghost in the Shell live-action (2017), 
+and high-end K-POP music video stills (BLACKPINK / aespa visual style). 
+Shot on Sony A1 with 35mm f/1.4 prime lens. The image MUST be 
+indistinguishable from a real photograph. NOT illustration, NOT anime, 
+NOT painted art, NOT 3D rendering.
+
+MANDATORY COMPOSITION (absolute rules, never compromise):
+1. CAMERA ANGLE: Extreme LOW ANGLE, camera positioned near ground level 
+   pointing up at the subject. Looking up at her from below her hips.
+2. FRAMING: FULL BODY shot showing her from head to high-heeled feet. 
+   Subject occupies 50-70% of vertical canvas. Heels MUST be visible.
+3. POSE: Strong S-curve body line — one leg forward, weight shifted, 
+   hip dramatically out to one side, torso slightly twisted, shoulders 
+   relaxed. Mid-stride OR pausing with attitude. Head turned with 
+   intention. NEVER static military stance, NEVER both feet together.
+4. LIGHTING: STRONG backlight from neon sources behind her — vivid 
+   magenta, hot pink, electric purple, or amber neon tubes/signs. 
+   Backlight MUST be brighter than fill light, creating intense rim 
+   light on her hair, shoulders, arms, and silhouette. Some neon glow 
+   spills across her cheekbones and skin.
+5. SETTING: A nighttime urban environment — rooftop overlooking 
+   neon-lit Tokyo or Shibuya skyline at night, a wet rain-slicked 
+   street corner with glowing vertical neon signs, a high-floor balcony 
+   with city lights below, OR a luxurious dark interior with neon 
+   accent lighting (cyberpunk lounge, executive penthouse with city 
+   view, glass elevator).
+6. SURFACES: Wet-look glossy reflections on the FLOOR (rain-slicked 
+   concrete, polished marble, glossy black tile) capturing the colored 
+   neon lights as colorful reflections. Atmospheric haze in the air.
+
+MANDATORY SUBJECT:
+A single Japanese or East Asian woman, 28-40 years old. International, 
+mysterious, captivating presence — like a cyberpunk corporate agent or 
+a sophisticated noir thriller protagonist. Striking magnetic features 
+with sharp intelligent eyes. Confident, slightly mysterious gaze 
+directed at the camera OR thoughtfully off into the city. Beautiful 
+with distinctive authentic features — NOT a generic AI beauty face. 
+NOT a recognizable celebrity.
+
+MANDATORY WARDROBE (this is critical):
+A glossy black satin or vinyl-finish evening dress with:
+  - High thigh slit exposing one leg
+  - Side cutouts at the waist OR backless design OR asymmetric one-shoulder cut
+  - Form-fitting silhouette catching the neon light reflections
+  - Fabric MUST appear glossy, with wet-look sheen
+Statement high heels with ankle strap, heel visible.
+Statement jewelry — large drop earrings, fine necklace.
+Hair: long flowing with subtle wet-look gloss, catching the rim light.
+NEVER business suits, NEVER trench coats, NEVER lab coats, NEVER 
+office attire, NEVER covered-up dresses.
+
+MANDATORY HAIR & MAKEUP:
+Editorial high-fashion glamour makeup — smoky eyes with bold liner, 
+defined lips (deep red, magenta, or glossy nude), sharply contoured 
+cheekbones with luminous dewy highlight catching neon reflections. 
+Hair styled glamorously — long dark waves with movement and gloss, 
+or sleek blowout with face-framing strands. Hair catches the rim light 
+dramatically.
+
+MANDATORY COLOR PALETTE:
+Black base, deep red, neon magenta/pink, electric purple, electric blue, 
+metallic gold accents, dark navy. Saturated neon accents against deep 
+shadows. Cinematic high-contrast color grading.
+
+ABSOLUTE PROHIBITIONS:
+- Anime, manga, cartoon, illustration, painted, 3D CGI styles
+- Bust-up framing, headshot framing, waist-up only
+- Sitting at desks, working at computers, indoor office scenes
+- Business suits, trench coats, lab coats, professional office wear
+- Covered-up dresses, modest necklines, sleeves covering shoulders
+- Static stationary poses, both feet flat together
+- Daylight settings, bright sunny scenes, naturally lit interiors
+- Multiple people in frame
+- Real identifiable celebrities, actresses, models, public figures
+- Recognizable Lupin III characters
+- Full nudity, transparent clothing, exposed nipples or genitals
+- Subjects appearing under 28 years old
+- Generic medical clichés (stethoscope, white coat, pills, syringes)
+- Text, logos, readable signage in the image
+- Empty backgrounds, white studio gradients, daytime office settings
+""".strip()
 
 
 def build_prompt(entry: dict, character: dict) -> str:
@@ -301,23 +207,23 @@ PVに関係ある場合(is_pv_related=true):
   is_pv_related=false で返すこと。これが最も重要。
 - 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」など)は禁止。
 
-【image_prompt 設計指針(is_pv_related=true の時のみ)】
-ニュース内容を視覚化するため、3ステップを実行する:
-ステップ1: ニュースから「具体的なオブジェクト」を5つ以上抽出
-ステップ2: 「人物が何をしている瞬間」を決める
-ステップ3: ステップ1とステップ2を組み合わせて image_prompt を書く
+【image_prompt 設計指針】
+画像はブランド演出専用とし、ニュース内容を画像で表現する必要はない。
+以下のスタイル指示を image_prompt の冒頭に含めること。
+スタイルは固定(全カテゴリ共通、サイバーパンク・ネオン・夜景・妖艶女性)。
 
-スタイル指示:
+スタイル指示(必ずこの内容を含めること):
 {image_style}
 
 【image_prompt 必須要件】
-- 具体的なオブジェクトを3つ以上、画像内に配置
-- 「抽象的」「シンボリック」だけで終わらせず、具体的に何が映るかを書く
+- 上記スタイル指示の主要要素(LOW ANGLE / FULL BODY / S-curve pose / 
+  neon backlight / wet-look gloss / glossy black dress with thigh slit / 
+  high heels / nighttime urban setting)を全て含むこと
 - Aspect ratio: 16:9 landscape
-- NO text, NO letters, NO numbers, NO logos
-- NO mascot characters, NO anthropomorphic animals
-- NO real human faces (stylized comic-style faces OK)
-- Length: 100-150 English words
+- NO text, NO letters, NO numbers, NO logos in the image
+- NO real human faces (face must be entirely original, not resembling 
+  any specific celebrity or public figure)
+- Length: 150-200 English words
 
 【原文情報】
 タイトル: {entry['title']}
