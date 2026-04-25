@@ -59,11 +59,7 @@ Her face is original and must not resemble any real celebrity, model, public fig
 She should look mature, elegant, and charismatic.
 
 POSE:
-She is walking forward, captured mid-stride with natural movement in her posture, hair, and clothing.
-One leg is naturally stepping forward.
-Her body is slightly angled, creating a strong elegant silhouette.
-Her expression is calm, confident, and poised.
-The pose should feel like a fashion editorial walking shot, not a static studio pose.
+A seductive, sexy pose that would provoke men.
 
 WARDROBE:
 Japanese high school girls' sailor uniforms have very short skirts.
