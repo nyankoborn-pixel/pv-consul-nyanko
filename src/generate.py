@@ -43,197 +43,115 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: 添付参考画像準拠 — サイバーパンク的ネオン都市夜景 + 妖艶女性
-    Blade Runner 2049 / Cyberpunk 2077 / 攻殻機動隊実写版 / K-POP MV美学
-    全カテゴリ統一(カテゴリ別ブレを排除)
+    画像スタイル: ルパン三世風アニメ(全カテゴリ統一)
+    Monkey Punch / TMS Entertainment 1970s-90s 系のレトロアニメ調
     """
-    return """
-Style: Hyperrealistic cyberpunk fashion editorial photography, 
-ultra-detailed, 8K resolution. Aesthetic: a fusion of Blade Runner 2049, 
-Cyberpunk 2077 cinematic shots, Ghost in the Shell live-action (2017), 
-and high-end K-POP music video stills (BLACKPINK / aespa visual style). 
-Shot on Sony A1 with 35mm f/1.4 prime lens. The image MUST be 
-indistinguishable from a real photograph. NOT illustration, NOT anime, 
-NOT painted art, NOT 3D rendering.
-
-MANDATORY COMPOSITION (absolute rules, never compromise):
-1. CAMERA ANGLE: Extreme LOW ANGLE, camera positioned near ground level 
-   pointing up at the subject. Looking up at her from below her hips.
-2. FRAMING: FULL BODY shot showing her from head to high-heeled feet. 
-   Subject occupies 50-70% of vertical canvas. Heels MUST be visible.
-3. POSE: Strong S-curve body line — one leg forward, weight shifted, 
-   hip dramatically out to one side, torso slightly twisted, shoulders 
-   relaxed. Mid-stride OR pausing with attitude. Head turned with 
-   intention. NEVER static military stance, NEVER both feet together.
-4. LIGHTING: STRONG backlight from neon sources behind her — vivid 
-   magenta, hot pink, electric purple, or amber neon tubes/signs. 
-   Backlight MUST be brighter than fill light, creating intense rim 
-   light on her hair, shoulders, arms, and silhouette. Some neon glow 
-   spills across her cheekbones and skin.
-5. SETTING: A nighttime urban environment — rooftop overlooking 
-   neon-lit Tokyo or Shibuya skyline at night, a wet rain-slicked 
-   street corner with glowing vertical neon signs, a high-floor balcony 
-   with city lights below, OR a luxurious dark interior with neon 
-   accent lighting (cyberpunk lounge, executive penthouse with city 
-   view, glass elevator).
-6. SURFACES: Wet-look glossy reflections on the FLOOR (rain-slicked 
-   concrete, polished marble, glossy black tile) capturing the colored 
-   neon lights as colorful reflections. Atmospheric haze in the air.
-
-MANDATORY SUBJECT:
-A single Japanese or East Asian woman, 28-40 years old. International, 
-mysterious, captivating presence — like a cyberpunk corporate agent or 
-a sophisticated noir thriller protagonist. Striking magnetic features 
-with sharp intelligent eyes. Confident, slightly mysterious gaze 
-directed at the camera OR thoughtfully off into the city. Beautiful 
-with distinctive authentic features — NOT a generic AI beauty face. 
-NOT a recognizable celebrity.
-
-MANDATORY WARDROBE (this is critical):
-A glossy black satin or vinyl-finish evening dress with:
-  - High thigh slit exposing one leg
-  - Side cutouts at the waist OR backless design OR asymmetric one-shoulder cut
-  - Form-fitting silhouette catching the neon light reflections
-  - Fabric MUST appear glossy, with wet-look sheen
-Statement high heels with ankle strap, heel visible.
-Statement jewelry — large drop earrings, fine necklace.
-Hair: long flowing with subtle wet-look gloss, catching the rim light.
-NEVER business suits, NEVER trench coats, NEVER lab coats, NEVER 
-office attire, NEVER covered-up dresses.
-
-MANDATORY HAIR & MAKEUP:
-Editorial high-fashion glamour makeup — smoky eyes with bold liner, 
-defined lips (deep red, magenta, or glossy nude), sharply contoured 
-cheekbones with luminous dewy highlight catching neon reflections. 
-Hair styled glamorously — long dark waves with movement and gloss, 
-or sleek blowout with face-framing strands. Hair catches the rim light 
-dramatically.
-
-MANDATORY COLOR PALETTE:
-Black base, deep red, neon magenta/pink, electric purple, electric blue, 
-metallic gold accents, dark navy. Saturated neon accents against deep 
-shadows. Cinematic high-contrast color grading.
-
-ABSOLUTE PROHIBITIONS:
-- Anime, manga, cartoon, illustration, painted, 3D CGI styles
-- Bust-up framing, headshot framing, waist-up only
-- Sitting at desks, working at computers, indoor office scenes
-- Business suits, trench coats, lab coats, professional office wear
-- Covered-up dresses, modest necklines, sleeves covering shoulders
-- Static stationary poses, both feet flat together
-- Daylight settings, bright sunny scenes, naturally lit interiors
-- Multiple people in frame
-- Real identifiable celebrities, actresses, models, public figures
-- Recognizable Lupin III characters
-- Full nudity, transparent clothing, exposed nipples or genitals
-- Subjects appearing under 28 years old
-- Generic medical clichés (stethoscope, white coat, pills, syringes)
-- Text, logos, readable signage in the image
-- Empty backgrounds, white studio gradients, daytime office settings
-""".strip()
-
-
-def build_prompt(entry: dict, character: dict) -> str:
-    char = character["character"]
-    category = classify_news_category(entry)
-    image_style = get_image_style_for_category(category)
+    common_style = (
+        "Style: Classic Japanese anime illustration inspired by Lupin III "
+        "(Monkey Punch / TMS Entertainment, 1970s-1990s era). Hand-drawn cel "
+        "animation aesthetic with bold black ink lines and confident "
+        "brushstrokes. Flat color shading with limited cel-style gradients. "
+        "Retro saturated color palette: deep navy blue, mustard gold, warm "
+        "browns, with one accent color (crimson red, emerald green, or "
+        "electric blue) used sparingly for emphasis. Cinematic film noir "
+        "lighting with strong shadows. Slightly exaggerated character "
+        "proportions with elegant sophistication. Dynamic, theatrical poses. "
+        "The atmosphere should feel like a key still from a classic anime "
+        "heist or political thriller — stylish, sharp, charged with "
+        "intrigue. Cel-shaded animation aesthetic, NOT photorealistic, "
+        "NOT modern digital painting, NOT 3D rendering."
+    )
     
-    prompt = f"""あなたは「{char['name']}」というキャラクターです。
-PVニュースのXポスト用に、読者の手を止める日本語要約と、雑誌表紙のような
-画像プロンプトを生成してください。
-
-【キャラクター設定】
-- 名前: {char['name']}
-- 性格: {", ".join(char['personality'])}
-- スタイル: 静かに本質を見抜くPVコンサルの視点。データと業界知見で語る
-
-【今回のニュースカテゴリ】 {category}
-
-【最初の判定 - 極めて重要】
-このニュースが「PV(医薬品安全性監視)/医薬品/製薬業界」と
-直接関係あるかを判定してください。
-
-PVに関係ある例:
-- 医薬品の安全性管理、副作用監視、ICSR、シグナル検出
-- 製薬企業の戦略、組織変更、AI/DX導入
-- 規制制度(GVP省令、ICH ガイドライン、PMDA/FDA/EMA の発出)
-- 医薬品AI、製薬AI、医療AIの中で薬と関わるもの
-
-PVに関係ない例:
-- 一般的なIT企業のAIガバナンス
-- 物理学・化学の研究
-- 医療機関(病院)の運営の話で薬と無関係
-- 食品、化粧品、サプリメント
-- 一般的なAI規制の話で医薬品と無関係
-
-判定方法:
-- 原文に「医薬品」「製薬」「PV」「ファーマコビジランス」「副作用」
-  「ICSR」「シグナル検出」「FDA/EMA/PMDA」のいずれか、または
-  製薬企業名・医薬品関連の固有名詞が明示されている → "yes"
-- 原文に上記がなく、強引にPVに寄せないと書けない → "no"
-
-【出力形式】
-PVに関係ない場合(is_pv_related=false):
-{{
-  "is_pv_related": false,
-  "skip_reason": "なぜPVと無関係と判断したか短く記載"
-}}
-
-PVに関係ある場合(is_pv_related=true):
-{{
-  "is_pv_related": true,
-  "summary": "120-180字、フックのある日本語要約",
-  "image_prompt": "100-150 words、英語の画像プロンプト"
-}}
-
-【summary 設計指針(is_pv_related=true の時のみ)】
-読者(PVコンサル、製薬企業の安全性管理担当、規制当局関係者)の手を
-タイムライン上で止めることを最優先する。
-
-書き方:
-1. 冒頭1文目で「なぜこのニュースが面白いか」を提示する。
-   役所主語(「○○省は」「PMDAは」)で始めない。
-   ニュースの主役(薬、技術、企業、トレンド)を主語にする。
-2. コンサル目線の解釈、業界の見立て、構造分析を加えてよい。
-3. 数値・日付・固有名詞は原文に明記されている範囲で自由に使ってよい。
-   ただし**原文に書かれていないPV略語(ICSR/PSUR/RMP/PBRER等)を
-   無理に入れない**。原文がそれらに言及していなければ、フルスペル
-   または一般用語で記述する。
-4. 末尾の汎用的な締め(「医療従事者は確認すべき」「動向を注視」等)は禁止。
-5. 文末は「〜とのこと」「〜と報告されている」「〜と発表された」など。
-
-【厳守】
-- 原文が医薬品/PVと無関係なら、無理に医薬品の話に寄せず
-  is_pv_related=false で返すこと。これが最も重要。
-- 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」など)は禁止。
-
-【image_prompt 設計指針】
-画像はブランド演出専用とし、ニュース内容を画像で表現する必要はない。
-以下のスタイル指示を image_prompt の冒頭に含めること。
-スタイルは固定(全カテゴリ共通、サイバーパンク・ネオン・夜景・妖艶女性)。
-
-スタイル指示(必ずこの内容を含めること):
-{image_style}
-
-【image_prompt 必須要件】
-- 上記スタイル指示の主要要素(LOW ANGLE / FULL BODY / S-curve pose / 
-  neon backlight / wet-look gloss / glossy black dress with thigh slit / 
-  high heels / nighttime urban setting)を全て含むこと
-- Aspect ratio: 16:9 landscape
-- NO text, NO letters, NO numbers, NO logos in the image
-- NO real human faces (face must be entirely original, not resembling 
-  any specific celebrity or public figure)
-- Length: 150-200 English words
-
-【原文情報】
-タイトル: {entry['title']}
-要約: {entry['summary'][:1500]}
-ソース: {entry['source_name']}
-
-最初に is_pv_related の判定をしてから、JSON形式で出力してください。
-前後に説明文を付けないこと。
-"""
-    return prompt
+    figure_directive = (
+        "MANDATORY: Include an original anime-style human character as the "
+        "focal point, occupying 40-60% of the canvas. The character must be "
+        "ORIGINAL (not Lupin, Jigen, Goemon, Fujiko, Zenigata, or any "
+        "copyrighted character) — design a new character that fits the news "
+        "context: a researcher, executive, regulator, or scientist. Show "
+        "their face clearly with a bold, expressive emotion (determined, "
+        "scheming, contemplative, alarmed). Use the classic anime face style: "
+        "sharp angular features, expressive eyes, defined jawline. Their "
+        "clothing should match the news context (lab coat, business suit, "
+        "regulator uniform) but stylized in the retro anime aesthetic. "
+        "Pose should be dynamic and theatrical — gesturing, reaching, "
+        "examining something significant, or in mid-action."
+    )
+    
+    background_directive = (
+        "BACKGROUND: Fully painted in cel-animation style, never empty. "
+        "Include detailed retro-anime environments: institutional interiors, "
+        "research laboratories, corporate boardrooms, city skylines at "
+        "dusk/night, or symbolic atmospheric scenes. Use dramatic film noir "
+        "lighting — strong directional light sources creating bold shadows, "
+        "venetian blind shadows, neon glows, or moody atmospheric haze. The "
+        "background should include specific objects relevant to the news "
+        "theme (documents, lab equipment, monitors, city architecture)."
+    )
+    
+    hard_forbidden = (
+        "DO NOT use: "
+        "- Modern anime style (Demon Slayer, Jujutsu Kaisen, Naruto-era look) "
+        "- Soft kawaii/moe style or chibi proportions "
+        "- Photorealistic rendering or 3D CGI "
+        "- Western comic book painted style (Alex Ross, Marvel) "
+        "- Minimalist line art or flat vector illustration "
+        "- Empty white backgrounds with negative space "
+        "- Any copyrighted Lupin III characters (Lupin, Jigen, Goemon, "
+        "  Fujiko, Zenigata, Inspector Zenigata) "
+        "- Generic stock medical clichés (pills + warning sign, stethoscope, "
+        "  caduceus, DNA helix as main subject) "
+        "- Modern digital painting techniques"
+    )
+    
+    category_scenes = {
+        "regulatory": (
+            "Scene direction: An original character as a determined regulator "
+            "or government official in a moment of decisive action — perhaps "
+            "presenting a document, signing a decree, or in tense negotiation "
+            "across a desk. Setting: a stately government office or "
+            "institutional hall with classic Japanese or international "
+            "architectural details. Strong shadows, perhaps light filtering "
+            "through tall windows. Include specific objects from the news "
+            "(documents, official seals, pens, architectural details)."
+        ),
+        "ai_tech": (
+            "Scene direction: An original character as a scientist or "
+            "engineer interacting with retro-futuristic AI technology — a "
+            "vintage-anime-style holographic interface, glowing CRT-like "
+            "screens, or an art-deco AI construct. Even though the theme is "
+            "AI, render the technology in the 1970s-90s anime aesthetic "
+            "(retro-future, not modern). Lab or control-room setting. "
+            "Include specific objects from the news theme."
+        ),
+        "market_business": (
+            "Scene direction: An original character as a corporate executive "
+            "in a moment of strategic confrontation or revelation — perhaps "
+            "leaning over a boardroom table, gesturing toward a strategic "
+            "diagram, or in tense conversation. Classic 70s-80s anime "
+            "boardroom aesthetic with wood paneling, large windows showing "
+            "city lights, dramatic chiaroscuro lighting. Include specific "
+            "objects from the news theme."
+        ),
+        "china": (
+            "Scene direction: An original character of East Asian appearance, "
+            "as a researcher or executive, in a setting blending modern "
+            "Chinese pharmaceutical/research environments with subtle "
+            "traditional aesthetic touches (stylized respectfully, not "
+            "stereotypical). Cel-animation rendering with cinematic lighting. "
+            "Avoid cliché imagery (no dragons, lanterns, pandas)."
+        ),
+        "general": (
+            "Scene direction: An original pharmaceutical industry character "
+            "(researcher, executive, regulator) in a dramatic theatrical "
+            "moment representing the news theme. Strong dynamic pose, clear "
+            "expressive emotion, fully rendered cel-animation background. "
+            "Include specific objects from the news theme."
+        ),
+    }
+    
+    scene = category_scenes.get(category, category_scenes["general"])
+    
+    return f"{common_style} {figure_directive} {background_directive} {scene} {hard_forbidden}"
 
 
 def generate_post_content(entry: dict, character: dict) -> dict:
