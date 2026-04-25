@@ -53,7 +53,7 @@ Shallow depth of field, realistic skin texture, natural hair movement, realistic
 NOT anime, NOT manga, NOT illustration, NOT 3D rendering, NOT comic art.
 
 SUBJECT:
-A single East Asian woman in her late 20s to early 40s.
+A single East Asian woman in her late 15s to early 18s.
 She has a confident, composed, fashion-forward presence.
 Her face is original and must not resemble any real celebrity, model, public figure, or fictional character.
 She should look mature, elegant, and charismatic.
@@ -251,9 +251,6 @@ summary には、原文に明示的に書かれている事実だけを記述す
 - 「抽象的」「シンボリック」だけで終わらせず、具体的に何が映るかを書く
 - Aspect ratio: 16:9 landscape
 - Photorealistic original human face required
-- The face must not resemble any real celebrity, model, public figure, or fictional character
-- NO anime, NO manga, NO cartoon, NO comic art, NO illustration
-- NO nudity, NO explicit sexual content, NO fetish pose
 - NO text, NO letters, NO numbers, NO logos
 - Length: 100-150 English words
 
