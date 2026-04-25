@@ -43,64 +43,88 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: The Economist / The New Yorker 風コンセプチュアル
+    画像スタイル: ライン主体ミニマル + シルエット人物 + 禁止語強化
+    Christoph Niemann / Noma Bar / NYT editorial illustration の系譜
     """
     common_style = (
-        "Style: Conceptual editorial cover illustration in the style of "
-        "The Economist or The New Yorker. Strong metaphor, dramatic composition "
-        "with strong contrast and depth. A single iconic visual symbol that "
-        "tells the story at a glance. Bold use of negative space. "
-        "Color palette: deep navy blue (#0E1B2E) as primary, gold (#C89D44) "
-        "accents, with one bold accent color for emphasis. "
-        "Modern, sophisticated, slightly surreal."
+        "Style: Minimalist editorial line illustration in the style of "
+        "Christoph Niemann, Noma Bar, or The New York Times editorial section. "
+        "Clean geometric lines, strong silhouettes, limited color palette: "
+        "deep navy blue (#0E1B2E) as primary, gold (#C89D44) accent, off-white "
+        "background. Strong negative space. Bold composition with clear focal point. "
+        "Slightly surreal, conceptually witty. No photorealism. No 3D rendering. "
+        "Flat or 2.5D illustration only."
     )
     
-    forbidden = (
-        "AVOID: generic safety/medical iconography. AVOID cliché compositions "
-        "like 'doctor with stethoscope', 'pills + warning sign', 'building + "
-        "documents stacked', 'caduceus medical symbol', 'molecule + DNA helix'. "
-        "AVOID flat infographic style. AVOID centered symmetrical layouts. "
-        "AVOID generic 'professional business' clipart aesthetics."
+    figure_directive = (
+        "MANDATORY: Always include ONE stylized human silhouette figure as the "
+        "focal point. Show the figure from the back, side, or partial view - "
+        "NEVER show the face clearly. The figure must be DOING SOMETHING SPECIFIC "
+        "that visualizes the news theme (examining, signing, presenting, observing, "
+        "deciding, reaching, holding). The silhouette should be filled with a flat "
+        "navy color, with gold accent details only on key elements."
     )
     
-    category_metaphors = {
+    hard_forbidden = (
+        "DO NOT use any of the following (these are overused clichés): "
+        "- Blue gradient backgrounds with particles or light streaks "
+        "- Medical pills, capsules, tablets, or pill bottles "
+        "- Molecular structures, DNA helix, atoms, or cells "
+        "- Glowing neon AI effects, hexagonal grids, circuit boards "
+        "- Stethoscope, lab coat, microscope, syringe, white-coated doctor "
+        "- Caduceus medical symbol, red cross, hospital cross "
+        "- Round symmetrical centered compositions "
+        "- 3D rendering, photorealistic textures, glossy reflections "
+        "- Generic 'business professional' clipart aesthetics "
+        "- Brain made of circuits, glowing neural networks"
+    )
+    
+    category_scenes = {
         "regulatory": (
-            "Theme: regulatory power, oversight, governance shifting. "
-            "Possible metaphors: a giant document casting a shadow over a city, "
-            "scales tipping, threads connecting institutions, an oversized seal "
-            "imprinting on industry, layers of paper forming a maze. "
-            "Find an unexpected angle."
+            "Scene direction: A figure examining or signing an oversized document/seal. "
+            "Or a figure standing before a wall of paper/regulations that dwarfs them. "
+            "Or a figure pulling a thread that connects multiple institutional buildings. "
+            "The composition should convey 'oversight', 'authority shifting', or "
+            "'new rules being written'. The document/regulation should be visually "
+            "abstracted (geometric shapes, lines) - never literal text."
         ),
         "ai_tech": (
-            "Theme: AI transformation in pharma. Possible metaphors: a single "
-            "AI eye scanning rows of pills, neural networks growing like roots "
-            "from medication, a robot hand carefully holding a fragile vial, "
-            "data streams flowing through medical environments. "
-            "Avoid generic 'brain + circuit' clichés."
+            "Scene direction: A figure interacting with an abstract geometric form "
+            "that represents AI - lines emerging from their hand, a geometric mesh "
+            "they're shaping, or a single luminous gold shape they're examining. "
+            "Or a figure facing away from the viewer, looking at an abstract pattern "
+            "of lines/grids that extends beyond the frame. Avoid all literal "
+            "computer/screen/circuit imagery. AI should be represented by ABSTRACT "
+            "GEOMETRY (lines, dots, simple forms) only."
         ),
         "market_business": (
-            "Theme: corporate strategy, market dynamics, organizational shift. "
-            "Possible metaphors: chess pieces on a pharmaceutical landscape, "
-            "interlocking gears representing partnerships, a tower being "
-            "rebuilt mid-air, paths diverging in a corporate landscape. "
-            "Should feel strategic and consequential."
+            "Scene direction: A figure mid-action in a strategic moment - moving a "
+            "large geometric piece, balancing on a tilted shape, climbing or "
+            "descending an abstract structure. Or two silhouette figures in a "
+            "moment of negotiation or confrontation. The composition should convey "
+            "'consequence', 'decision', or 'shifting power'. Avoid corporate office "
+            "settings; use abstract geometric environments."
         ),
         "china": (
-            "Theme: China's pharmaceutical and regulatory rise. Possible "
-            "metaphors: traditional Chinese pattern merging with modern AI "
-            "elements, a dragon coiled around a pharmaceutical symbol, "
-            "ascending steps in oriental aesthetic, ink wash style mixed with "
-            "circuit patterns. Respectful, not stereotypical."
+            "Scene direction: A figure with subtle nods to East Asian aesthetic "
+            "elements (cleanly stylized, never stereotypical) interacting with "
+            "abstract geometric forms. Possibly using ink-wash inspired brush "
+            "strokes for accent details only. Avoid dragons, lanterns, pandas, or "
+            "any cliché Chinese imagery. Keep it minimal and respectful - the "
+            "Asian context should be subtle, conveyed through composition rhythm "
+            "and a single stylized accent rather than overt symbols."
         ),
         "general": (
-            "Theme: pharmaceutical industry shift or insight. Find a strong, "
-            "specific visual metaphor for the news content."
+            "Scene direction: A figure in a moment of focused action that "
+            "represents the news theme. Find a specific verb (examining, "
+            "weighing, choosing, reaching) and build the composition around it. "
+            "Use abstract geometric forms as the figure's environment."
         ),
     }
     
-    metaphor = category_metaphors.get(category, category_metaphors["general"])
+    scene = category_scenes.get(category, category_scenes["general"])
     
-    return f"{common_style} {metaphor} {forbidden}"
+    return f"{common_style} {figure_directive} {scene} {hard_forbidden}"
 
 
 def build_prompt(entry: dict, character: dict) -> str:
