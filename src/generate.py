@@ -213,9 +213,9 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
 
 def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") -> str:
     """
-    Gemini 2.5 Flash Image (Nano Banana) で画像生成
+    Gemini 2.5 Flash Image (Nano Banana) で画像生成 (新SDK使用)
     成功時: 保存したファイルパスを返す
-    失敗時: None を返す(呼び出し元でテキストのみ投稿にフォールバック)
+    失敗時: None を返す
     """
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -223,26 +223,29 @@ def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") 
         return None
     
     try:
-        genai.configure(api_key=api_key)
+        from google import genai as new_genai
+        from google.genai import types
         
-        model = genai.GenerativeModel("gemini-2.5-flash-image")
+        client = new_genai.Client(api_key=api_key)
         
-        response = model.generate_content(
-            image_prompt,
-            generation_config={
-                "response_modalities": ["IMAGE"],
-            },
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-image",
+            contents=image_prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio="16:9",
+                ),
+            ),
         )
         
-        # レスポンスから画像バイナリを抽出
-        for candidate in response.candidates:
-            for part in candidate.content.parts:
-                if hasattr(part, "inline_data") and part.inline_data:
-                    image_bytes = part.inline_data.data
-                    with open(output_path, "wb") as f:
-                        f.write(image_bytes)
-                    print(f"[image] Saved to {output_path} ({len(image_bytes)} bytes)")
-                    return output_path
+        for part in response.parts:
+            if part.inline_data and part.inline_data.data:
+                image_bytes = part.inline_data.data
+                with open(output_path, "wb") as f:
+                    f.write(image_bytes)
+                print(f"[image] Saved to {output_path} ({len(image_bytes)} bytes)")
+                return output_path
         
         print("[image] No image data in response")
         return None
