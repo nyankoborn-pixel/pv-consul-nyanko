@@ -1,6 +1,6 @@
 """
-generate.py - Gemini Flash を使ってコンサルにゃんこ口調でポスト生成
-ニュース情報を最優先で保持する切り詰めロジックを採用
+generate.py - Gemini Flash でコンサルにゃんこ要約 + 画像プロンプトを生成
+The Rundown AI 型: 親ポストに画像、自リプライにソースURL
 """
 import os
 import yaml
@@ -38,81 +38,66 @@ def classify_news_category(entry: dict) -> str:
     return "general"
 
 
-def get_tone_instruction(category: str) -> str:
-    tones = {
-        "regulatory": """
-このニュースは規制・ガイダンス系です。commentary には以下のような
-「コンサルあるある」「規制文書の読み方の裏読み」を軽く効かせてください:
- - 規制用語(検討する、適切に、速やかに等)に対する業界人的な穿った視点
- - 「また添付文書が厚くなる」系の業界感覚
-ただし、特定の役所・当局を直接揶揄する表現は避けること。
-""",
-        "ai_tech": """
-このニュースはAI・技術系です。commentary には以下のような
-「現場と経営層の温度差」「PoC疲れ」「実装の現実」を軽く効かせてください:
- - 「AIの前にまず紙とExcelが...」系の現場あるある
- - バズワードと実装ギャップへのゆるい皮肉
-""",
-        "recall_safety": """
-このニュースは回収・副作用・安全性の重大情報です。commentary は軽口を避け、
-患者・医療関係者への配慮を示しつつ、静かで誠実なトーンで書いてください。
-軽いジョーク・ギャグ・自嘲は絶対に入れないこと。
-""",
-        "market_business": """
-このニュースは市場・ビジネス系です。commentary には以下のような
-「コンサル食い扶持ジョーク」「市場予測の常套句への軽い皮肉」を混ぜてください:
- - 「XX億ドル」「2033年までに」のような予測に対するゆるい距離感
-""",
-        "general": """
-commentary には、コンサル目線の静かな洞察や、業界人がニヤッとする一言を
-混ぜてください。抽象的な一般論(「重要な課題です」等)は避けること。
-""",
+def get_image_style_for_category(category: str) -> str:
+    """カテゴリ別の画像スタイル指示(英語)"""
+    styles = {
+        "regulatory": "editorial illustration of regulatory documents, official seals, abstract law/compliance imagery, professional and serious tone",
+        "ai_tech": "editorial illustration of abstract AI concepts, neural networks, data flows, modern technology imagery, clean and futuristic",
+        "recall_safety": "editorial illustration of medical safety, careful and respectful tone, abstract pharmaceutical imagery, no graphic content",
+        "market_business": "editorial illustration of business charts, growth curves, abstract financial imagery, professional corporate style",
+        "general": "editorial illustration of abstract pharmaceutical industry concepts, professional and clean style",
     }
-    return tones.get(category, tones["general"])
+    return styles.get(category, styles["general"])
 
 
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
     category = classify_news_category(entry)
-    tone_instruction = get_tone_instruction(category)
+    image_style = get_image_style_for_category(category)
     
     prompt = f"""あなたは「{char['name']}」というキャラクターです。
-以下のキャラ設定を厳密に守って、PVニュースのポストを日本語で生成してください。
+PVニュースのXポスト用に、日本語要約と画像プロンプトを生成してください。
 
 【キャラクター設定】
 - 名前: {char['name']}
-- 口ぐせ: 「{char['catchphrase']}」
 - 性格: {", ".join(char['personality'])}
-- スタイル: 静かに本質を見抜く執事猫。抽象的な一般論より、具体的な観点を選ぶ
-- 禁止事項:
-{chr(10).join(f"  - {f}" for f in char['forbidden'])}
+- スタイル: 静かに本質を見抜く視点。事実を中立的に、しかし要点を逃さず伝える
 
 【今回のニュースカテゴリ】 {category}
-{tone_instruction}
 
 【厳守すべき制約】
 1. 原文に書かれていない固有名詞・企業名・製品名・数値・日付を絶対に使用しないこと
 2. 原文から推測できない事実は述べないこと
 3. 医療アドバイス・投資判断に関わる表現は避けること
-4. summary部分は中立的な事実要約、断定を避け「〜とのこと」「〜と報告されています」を使う
-5. 文字数(極めて重要):
-   - summaryは120字以上150字以内(ニュース情報を十分に含めること)
-   - commentaryは35字以内(短く、ピリッと)
-6. summaryには、以下を必ず含めること:
-   - 主体(誰が): 企業名、機関名など
-   - 何が起きたか: 動作の核心
-   - 重要なキーポイント1つ(対象、場所、目的、効果のいずれか)
-7. 出力は以下のJSON形式のみ。前後に説明文を付けないこと
+4. summaryは中立的な事実要約。断定を避け「〜とのこと」「〜と報告されています」「〜と発表されました」を使う
+5. 文字数: summaryは150字以上180字以内(主体・出来事・重要点を必ず含めること)
+6. 出力は以下のJSON形式のみ。前後に説明文を付けないこと
 
 【出力形式】
 {{
-  "summary": "120-150字の事実要約(主体・出来事・重要点を含む)",
-  "commentary": "35字以内のコンサル視点コメント(具体的、抽象一般論NG)"
+  "summary": "150-180字の事実要約",
+  "image_prompt": "英語の画像生成プロンプト(下記の制約厳守)"
 }}
 
-【summary 書き方の例】
-  ❌ "QPSが臨床試験におけるファーマコビジランス強化に向けてシステムを採用したとのこと"(主体は分かるが何のシステムで何のためか曖昧)
-  ✓ "CROのQPSが臨床試験のPV強化のため、Oracle Argus Safetyを採用したと発表されました。安全性報告の効率化と規制対応の信頼性向上を目的としています"
+【image_prompt の必須要件 - 厳守】
+- Style: {image_style}
+- Absolutely NO text, NO letters, NO numbers, NO characters in the image
+- NO mascot characters, NO anthropomorphic animals, NO cartoon characters
+- NO real human faces or identifiable people
+- NO company logos, NO branded items
+- Abstract and conceptual visualization of the news theme
+- Color palette: navy blue, gold accents, clean professional
+- Aspect ratio suggestion: 16:9 landscape
+- Length: 30-60 English words
+
+【image_prompt 良い例】
+"editorial illustration of abstract regulatory documents floating in deep navy blue background with gold accents, clean professional style, no text, no characters, no logos, 16:9 aspect ratio, conceptual minimalist composition"
+
+【image_prompt 悪い例(絶対避ける)】
+- "Japanese text saying ..." (テキスト含む)
+- "a cute mascot cat ..." (キャラクター含む)
+- "person holding ..." (人物含む)
+- "Pfizer logo ..." (ブランド含む)
 
 【原文情報】
 タイトル: {entry['title']}
@@ -155,7 +140,7 @@ def generate_post_content(entry: dict, character: dict) -> dict:
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Failed to parse Gemini JSON output: {e}\nRaw: {text}")
     
-    if "summary" not in result or "commentary" not in result:
+    if "summary" not in result or "image_prompt" not in result:
         raise RuntimeError(f"Gemini output missing required fields: {result}")
     
     result["_category"] = classify_news_category(entry)
@@ -195,49 +180,32 @@ def select_hashtags(entry: dict, character: dict) -> list:
 
 def compose_post(entry: dict, gen: dict, character: dict) -> str:
     """
-    最終的な投稿文を組み立て。
-    優先順位: ニュース summary > URL > ハッシュタグ > commentary
-    つまり、はみ出したらまず commentary を削り、最後に summary を切る。
+    親ポストの本文を組み立て(画像とリプライURLは別途扱う)
+    優先順位: summary > hashtags
     """
     tags = select_hashtags(entry, character)
     hashtags_str = " ".join(tags)
-    link = entry.get("link", "").strip()
     summary = gen["summary"]
-    commentary = gen["commentary"]
     max_total = character.get("max_chars", 278)
     
-    url_part = f"\n{link}" if link else ""
-    
     # Step 1: 全部入りで試す
-    full_post = f"{summary}\n\n🐾 {commentary}\n\n{hashtags_str}{url_part}"
+    full_post = f"{summary}\n\n{hashtags_str}"
     if len(full_post) <= max_total:
         return full_post
     
-    # Step 2: commentary を切り詰める
-    overhead_no_commentary = len(f"\n\n🐾 \n\n{hashtags_str}{url_part}")
-    allowed_commentary = max_total - len(summary) - overhead_no_commentary
-    if allowed_commentary >= 10:  # commentaryに10字以上使える
-        truncated_comm = commentary[:allowed_commentary - 1] + "…" if len(commentary) > allowed_commentary else commentary
-        return f"{summary}\n\n🐾 {truncated_comm}\n\n{hashtags_str}{url_part}"
-    
-    # Step 3: commentary を完全に省略する
-    no_comm_post = f"{summary}\n\n{hashtags_str}{url_part}"
-    if len(no_comm_post) <= max_total:
-        return no_comm_post
-    
-    # Step 4: ハッシュタグを必須2個 + AI生成のみに削減
+    # Step 2: ハッシュタグを必須3個に削減
     minimal_tags = " ".join([
-        character["hashtags"]["always"][0],  # #Pharmacovigilance
-        character["hashtags"]["always"][1],  # #DrugSafety
-        character["ai_disclosure"]            # #AI生成
+        character["hashtags"]["always"][0],
+        character["hashtags"]["always"][1],
+        character["ai_disclosure"]
     ])
-    minimal_post = f"{summary}\n\n{minimal_tags}{url_part}"
+    minimal_post = f"{summary}\n\n{minimal_tags}"
     if len(minimal_post) <= max_total:
         return minimal_post
     
-    # Step 5: 最終手段、summary を切り詰める
-    overhead_minimal = len(f"\n\n{minimal_tags}{url_part}")
-    allowed_summary = max_total - overhead_minimal
+    # Step 3: 最終手段、summaryを切り詰める
+    overhead = len(f"\n\n{minimal_tags}")
+    allowed_summary = max_total - overhead
     if allowed_summary > 1:
         summary = summary[:allowed_summary - 1] + "…"
-    return f"{summary}\n\n{minimal_tags}{url_part}"
+    return f"{summary}\n\n{minimal_tags}"
