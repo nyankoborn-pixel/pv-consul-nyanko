@@ -43,49 +43,55 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: ルパン三世風アニメ(全カテゴリ統一)
-    Monkey Punch / TMS Entertainment 1970s-90s 系のレトロアニメ調
+    画像スタイル: ルパン三世風アニメ(明るく親しみやすいトーン版)
+    Monkey Punch / TMS Entertainment 系のレトロアニメ調
+    照明は明るく、女性キャラは微笑みや穏やかな表情を持つ
     """
     common_style = (
         "Style: Classic Japanese anime illustration inspired by Lupin III "
-        "(Monkey Punch / TMS Entertainment, 1970s-1990s era). Hand-drawn cel "
-        "animation aesthetic with bold black ink lines and confident "
-        "brushstrokes. Flat color shading with limited cel-style gradients. "
-        "Retro saturated color palette: deep navy blue, mustard gold, warm "
-        "browns, with one accent color (crimson red, emerald green, or "
-        "electric blue) used sparingly for emphasis. Cinematic film noir "
-        "lighting with strong shadows. Slightly exaggerated character "
-        "proportions with elegant sophistication. Dynamic, theatrical poses. "
-        "The atmosphere should feel like a key still from a classic anime "
-        "heist or political thriller — stylish, sharp, charged with "
-        "intrigue. Cel-shaded animation aesthetic, NOT photorealistic, "
-        "NOT modern digital painting, NOT 3D rendering."
+        "(Monkey Punch / TMS Entertainment, 1970s-1990s era). Hand-drawn "
+        "cel animation aesthetic with bold black ink lines and confident "
+        "brushstrokes. Flat color shading. BRIGHT and warm color palette: "
+        "sunny yellows, warm oranges, fresh blues, mustard gold, soft "
+        "pastels with vibrant accent colors. Cheerful, optimistic mood. "
+        "Cel-shaded animation aesthetic, NOT photorealistic, NOT modern "
+        "digital painting, NOT 3D rendering."
+    )
+    
+    lighting_directive = (
+        "LIGHTING: BRIGHT and CHEERFUL — soft daylight from large windows, "
+        "warm sunny illumination, or bright clean indoor lighting. "
+        "Even, well-lit scene with soft shadows. NEVER film noir, NEVER "
+        "dramatic chiaroscuro, NEVER dark moody atmosphere, NEVER night "
+        "scenes. The mood should feel optimistic and inviting."
     )
     
     figure_directive = (
-        "MANDATORY: Include an original anime-style human character as the "
+        "MANDATORY: Include an original anime-style female character as the "
         "focal point, occupying 40-60% of the canvas. The character must be "
         "ORIGINAL (not Lupin, Jigen, Goemon, Fujiko, Zenigata, or any "
-        "copyrighted character) — design a new character that fits the news "
-        "context: a researcher, executive, regulator, or scientist. Show "
-        "their face clearly with a bold, expressive emotion (determined, "
-        "scheming, contemplative, alarmed). Use the classic anime face style: "
-        "sharp angular features, expressive eyes, defined jawline. Their "
-        "clothing should match the news context (lab coat, business suit, "
-        "regulator uniform) but stylized in the retro anime aesthetic. "
-        "Pose should be dynamic and theatrical — gesturing, reaching, "
-        "examining something significant, or in mid-action."
+        "copyrighted character). Show her face clearly with a WARM, "
+        "FRIENDLY EXPRESSION — a confident smile, a gentle laugh, a "
+        "playful smirk, or a kind welcoming look. NEVER serious frown, "
+        "NEVER cold expression, NEVER dark scowl. She should feel "
+        "approachable and intelligent. Use the classic anime face style: "
+        "expressive bright eyes, defined features, soft natural smile. "
+        "Clothing matches the news context (smart casual blouse, "
+        "professional but cheerful attire, retro-modern fashion) but "
+        "NEVER dark business suit alone — add color, accent scarves, "
+        "warm tones. Pose: dynamic and welcoming — gesturing, presenting, "
+        "examining with curiosity, mid-action with positive energy."
     )
     
     background_directive = (
         "BACKGROUND: Fully painted in cel-animation style, never empty. "
-        "Include detailed retro-anime environments: institutional interiors, "
-        "research laboratories, corporate boardrooms, city skylines at "
-        "dusk/night, or symbolic atmospheric scenes. Use dramatic film noir "
-        "lighting — strong directional light sources creating bold shadows, "
-        "venetian blind shadows, neon glows, or moody atmospheric haze. The "
-        "background should include specific objects relevant to the news "
-        "theme (documents, lab equipment, monitors, city architecture)."
+        "BRIGHT and welcoming environment — sunny office with large "
+        "windows showing blue sky, light-filled research lab with white "
+        "walls and warm wood accents, cheerful boardroom with city "
+        "skyline at golden hour, or vibrant urban scene during the day. "
+        "Soft natural lighting fills the space. The background should "
+        "feel optimistic and energetic, with specific objects relevant "
+        "to the news theme."
     )
     
     hard_forbidden = (
@@ -95,63 +101,64 @@ def get_image_style_for_category(category: str) -> str:
         "- Photorealistic rendering or 3D CGI "
         "- Western comic book painted style (Alex Ross, Marvel) "
         "- Minimalist line art or flat vector illustration "
-        "- Empty white backgrounds with negative space "
         "- Any copyrighted Lupin III characters (Lupin, Jigen, Goemon, "
         "  Fujiko, Zenigata, Inspector Zenigata) "
+        "- Dark, moody, noir, or dramatic chiaroscuro lighting "
+        "- Night scenes, dim interiors, shadowy atmospheres "
+        "- Serious frowning expression, cold or unfriendly faces "
+        "- All-dark color schemes (deep navy + black dominated) "
         "- Generic stock medical clichés (pills + warning sign, stethoscope, "
-        "  caduceus, DNA helix as main subject) "
-        "- Modern digital painting techniques"
+        "  caduceus, DNA helix as main subject)"
     )
     
     category_scenes = {
         "regulatory": (
-            "Scene direction: An original character as a determined regulator "
-            "or government official in a moment of decisive action — perhaps "
-            "presenting a document, signing a decree, or in tense negotiation "
-            "across a desk. Setting: a stately government office or "
-            "institutional hall with classic Japanese or international "
-            "architectural details. Strong shadows, perhaps light filtering "
-            "through tall windows. Include specific objects from the news "
-            "(documents, official seals, pens, architectural details)."
+            "Scene direction: An original cheerful character as a "
+            "regulatory professional in a bright stately government office "
+            "with tall sunny windows, white marble floors with warm light "
+            "reflections. She is presenting a document with a confident "
+            "warm smile, or gesturing toward an architectural feature. "
+            "Daylight floods the scene. Include specific objects: "
+            "documents, official seals, pens, classical architectural "
+            "details rendered in warm tones."
         ),
         "ai_tech": (
             "Scene direction: An original character as a scientist or "
-            "engineer interacting with retro-futuristic AI technology — a "
-            "vintage-anime-style holographic interface, glowing CRT-like "
-            "screens, or an art-deco AI construct. Even though the theme is "
-            "AI, render the technology in the 1970s-90s anime aesthetic "
-            "(retro-future, not modern). Lab or control-room setting. "
-            "Include specific objects from the news theme."
+            "engineer in a bright modern lab with white walls, large "
+            "windows, and warm wood accents. She is interacting with "
+            "retro-futuristic AI technology — a vintage-anime-style "
+            "holographic interface or glowing screens — with a curious "
+            "smile and engaged expression. Daylight streams in mixing "
+            "with the technology's glow. Include specific objects from "
+            "the news theme."
         ),
         "market_business": (
-            "Scene direction: An original character as a corporate executive "
-            "in a moment of strategic confrontation or revelation — perhaps "
-            "leaning over a boardroom table, gesturing toward a strategic "
-            "diagram, or in tense conversation. Classic 70s-80s anime "
-            "boardroom aesthetic with wood paneling, large windows showing "
-            "city lights, dramatic chiaroscuro lighting. Include specific "
-            "objects from the news theme."
+            "Scene direction: An original character as a corporate "
+            "executive in a bright sunny boardroom with floor-to-ceiling "
+            "windows showing a daytime city skyline. She is presenting "
+            "with confidence and a warm smile, gesturing toward a "
+            "diagram or speaking energetically. Classic 70s-80s anime "
+            "aesthetic with wood paneling and bright natural light. "
+            "Include specific objects from the news theme."
         ),
         "china": (
-            "Scene direction: An original character of East Asian appearance, "
-            "as a researcher or executive, in a setting blending modern "
-            "Chinese pharmaceutical/research environments with subtle "
-            "traditional aesthetic touches (stylized respectfully, not "
-            "stereotypical). Cel-animation rendering with cinematic lighting. "
-            "Avoid cliché imagery (no dragons, lanterns, pandas)."
+            "Scene direction: An original character of East Asian "
+            "appearance, as a researcher or executive, in a bright modern "
+            "Chinese pharmaceutical/research environment with subtle "
+            "traditional aesthetic touches. Daylight, warm tones, "
+            "cheerful expression. Avoid stereotypical imagery."
         ),
         "general": (
-            "Scene direction: An original pharmaceutical industry character "
-            "(researcher, executive, regulator) in a dramatic theatrical "
-            "moment representing the news theme. Strong dynamic pose, clear "
-            "expressive emotion, fully rendered cel-animation background. "
-            "Include specific objects from the news theme."
+            "Scene direction: An original pharmaceutical industry "
+            "character in a bright welcoming setting, with a warm smile "
+            "and confident pose representing the news theme. Cheerful "
+            "cel-animation background with daylight."
         ),
     }
     
     scene = category_scenes.get(category, category_scenes["general"])
     
-    return f"{common_style} {figure_directive} {background_directive} {scene} {hard_forbidden}"
+    return f"{common_style} {lighting_directive} {figure_directive} {background_directive} {scene} {hard_forbidden}"
 
 
 def build_prompt(entry: dict, character: dict) -> str:
