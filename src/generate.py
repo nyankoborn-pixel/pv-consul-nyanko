@@ -43,115 +43,49 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: ルパン三世風アニメ + 峰不二子レベルの妖艶演出
-    Monkey Punch / TMS Entertainment 1970s-90s 系
-    ボディコン衣装、ローアングル、ネオン背景、動きのあるポーズで存在感最大化
+    画像スタイル: ルパン三世風アニメ + 妖艶演出(圧縮・統一版)
+    全カテゴリ共通(カテゴリ別の差を廃止して指示を明確化)
     """
-    common_style = (
-        "Style: Classic Japanese anime illustration inspired by Lupin III "
-        "(Monkey Punch / TMS Entertainment, 1970s-1990s era). Hand-drawn "
-        "cel animation aesthetic with bold black ink lines and confident "
-        "brushstrokes. Flat color shading with dramatic cel-style "
-        "highlights and shadows. Saturated cinematic color palette: "
-        "deep blacks, vivid magenta and hot pink neons, electric blues, "
-        "crimson red, metallic gold accents, and rich purples. The "
-        "atmosphere should feel like a key still from a stylish anime "
-        "thriller — sleek, sexy, charged with adrenaline. Cel-shaded "
-        "animation aesthetic, NOT photorealistic, NOT modern digital "
-        "painting, NOT 3D rendering."
-    )
-    
-    composition_directive = (
-        "MANDATORY COMPOSITION (absolute, never compromise):\n"
-        "1. CAMERA ANGLE: Extreme LOW ANGLE shot from below the subject's "
-        "hips, looking up at her dramatically.\n"
-        "2. FRAMING: FULL BODY shot showing her from head to high-heeled "
-        "feet. Subject occupies 50-70% of vertical canvas. Heels and "
-        "long legs MUST be visible.\n"
-        "3. POSE: Dynamic motion — she is mid-stride walking forward, "
-        "turning with attitude, OR in a sultry mid-action pose with "
-        "strong S-curve body line. Hair swept by movement. Hip "
-        "dramatically out to one side. NEVER static, NEVER both feet "
-        "together, NEVER simply standing.\n"
-        "4. LIGHTING: STRONG backlight from neon sources behind her — "
-        "vivid magenta, hot pink, electric blue, or crimson neon. "
-        "Backlight brighter than fill light, creating intense rim light "
-        "on her hair, shoulders, and silhouette. Neon glow spills onto "
-        "her cheekbones and skin in colored highlights."
-    )
-    
-    figure_directive = (
-        "MANDATORY SUBJECT: An ORIGINAL anime-style mature woman as the "
-        "focal point. Confident, mysterious, captivating presence — like "
-        "a sophisticated international agent or femme fatale. Sharp "
-        "intelligent eyes with a knowing, slightly seductive gaze. "
-        "Striking adult features with elegant cheekbones and full lips. "
-        "Long flowing hair caught in motion or wind. ORIGINAL CHARACTER "
-        "ONLY — not Fujiko, Lupin, Jigen, Goemon, Zenigata, or any "
-        "copyrighted character.\n"
-        "EXPRESSION: Confident smirk, knowing smile, intense focus, "
-        "OR mysterious half-smile. NEVER serious frown, NEVER blank "
-        "expression, NEVER child-like big eyes.\n"
-        "ADULT PROPORTIONS: Tall, mature adult figure — clearly an adult "
-        "professional in her late 20s to 30s. NOT chibi, NOT teen, NOT "
-        "kawaii proportions."
-    )
-    
-    wardrobe_directive = (
-        "MANDATORY WARDROBE (this is critical for impact):\n"
-        "Glamorous bold attire — choose ONE:\n"
-        "- A glossy black or red form-fitting evening dress with high "
-        "thigh slit exposing one leg, plunging neckline, and statement "
-        "shoulder cut\n"
-        "- A tight bodycon dress with cutout details at the waist or "
-        "side, glossy fabric finish\n"
-        "- A satin slip dress with thin straps and asymmetric hem\n"
-        "- A sleek catsuit or fitted leather/vinyl outfit with heroic "
-        "spy aesthetic\n"
-        "Statement high heels with ankle straps, heels visible.\n"
-        "Bold accessories: large drop earrings, fine necklace catching "
-        "the neon light, slim leather gloves optional.\n"
-        "Hair: long, flowing dramatically in the wind or motion, with "
-        "rim light highlights catching the neon.\n"
-        "NEVER business suits, NEVER trench coats, NEVER lab coats, "
-        "NEVER conservative office attire, NEVER covered modest "
-        "clothing. This is high-impact glamour wardrobe."
-    )
-    
-    setting_directive = (
-        "SETTING: Nighttime urban environment — neon-lit Tokyo or Shibuya "
-        "street with vertical neon signs, a rain-slicked city corner with "
-        "glowing puddle reflections, a high-floor balcony overlooking a "
-        "neon city, OR a luxurious nightclub-lounge interior with "
-        "dramatic accent lighting. Wet glossy reflections on the ground "
-        "capturing the colored neon. Atmospheric haze for cinematic depth. "
-        "Neon signs in the background (no readable text, just neon shapes "
-        "and colors)."
-    )
-    
-    hard_forbidden = (
-        "ABSOLUTE PROHIBITIONS: "
-        "- Modern anime style (Demon Slayer, Jujutsu Kaisen, Naruto-era look) "
-        "- Soft kawaii/moe style or chibi proportions, child-like big eyes "
-        "- Photorealistic rendering or 3D CGI "
-        "- Western comic book painted style (Alex Ross, Marvel) "
-        "- Minimalist line art or flat vector illustration "
-        "- Any copyrighted Lupin III characters (Lupin, Jigen, Goemon, "
-        "Fujiko, Zenigata, Inspector Zenigata) "
-        "- Conservative office attire, business suits, trench coats, "
-        "lab coats, covered modest clothing "
-        "- Static stationary poses with both feet together "
-        "- Daylight settings, bright sunny scenes, daytime offices "
-        "- Bust-up framing, headshot framing, waist-up only "
-        "- Sitting at desks, working at computers "
-        "- Multiple people in frame "
-        "- Generic medical clichés (pills, stethoscope, caduceus, DNA) "
-        "- Text, letters, numbers, logos, readable signage in image "
-        "- Full nudity, transparent clothing, exposed nipples or genitals "
-        "- Subjects appearing under 25 years old"
-    )
-    
-    return f"{common_style}\n\n{composition_directive}\n\n{figure_directive}\n\n{wardrobe_directive}\n\n{setting_directive}\n\n{hard_forbidden}"
+    return """
+STYLE: Classic Lupin III cel anime (Monkey Punch / TMS Entertainment, 
+1970s-1990s era). Bold black ink lines, flat cel color shading, 
+dramatic exaggerated highlights and shadows. NOT photorealistic, 
+NOT 3D, NOT modern anime (Demon Slayer / Jujutsu Kaisen), NOT kawaii.
+
+COMPOSITION (mandatory, never compromise):
+- LOW ANGLE shot from below the subject's hips, looking up at her
+- FULL BODY shot from head to high-heeled feet, subject occupies 
+  50-70% of vertical canvas
+- DYNAMIC S-CURVE pose: mid-stride walking, turning over shoulder, 
+  or hip-shifted standing with body twist
+- NEVER static pose with both feet together, NEVER bust-up framing, 
+  NEVER seated
+
+SUBJECT: A single mature East Asian woman, age 28-38. Long hair 
+flowing in motion. Sharp intelligent eyes, confident half-smile or 
+sultry knowing smirk. Adult proportions (NOT child-like, NOT kawaii, 
+NOT chibi). Original character only — NEVER Lupin III copyrighted 
+characters (Fujiko, Lupin, Jigen, Goemon, Zenigata).
+
+WARDROBE: Glossy black or deep red bodycon dress with high thigh 
+slit on one leg, satin or vinyl sheen finish. Statement high heels 
+with ankle straps. Large drop earrings. NEVER business suits, 
+NEVER lab coats, NEVER trench coats, NEVER conservative covered 
+clothing.
+
+LIGHTING: Strong NEON BACKLIGHT from behind — vivid magenta, hot 
+pink, electric blue, or crimson. Backlight brighter than fill, 
+creating intense rim light on her hair, shoulders, and silhouette. 
+NEVER daylight, NEVER flat studio light.
+
+SETTING: Neon-lit nighttime city — vertical neon signs in background 
+(no readable text, just shapes and colors), wet glossy reflections 
+on the ground capturing colored light, atmospheric haze for cinematic 
+depth.
+
+ABSOLUTE PROHIBITIONS:
+- Lupin III copyrighted characters
+""".strip()
 
 
 def build_prompt(entry: dict, character: dict) -> str:
