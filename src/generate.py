@@ -1,7 +1,7 @@
 """
 generate.py - Gemini で要約+画像プロンプト+画像を生成
 The Rundown AI 型: 親ポストに画像、自リプライにソースURL
-画像路線: サイバーパンク的ネオン都市夜景 + 妖艶女性(添付参考画像準拠)
+画像路線: ルパン三世風アニメ(Monkey Punch / TMS Entertainment 1970s-90s)
 PV関連性判定: 記事がPV/医薬品と無関係なら投稿スキップ
 """
 import os
@@ -152,6 +152,109 @@ def get_image_style_for_category(category: str) -> str:
     scene = category_scenes.get(category, category_scenes["general"])
     
     return f"{common_style} {figure_directive} {background_directive} {scene} {hard_forbidden}"
+
+
+def build_prompt(entry: dict, character: dict) -> str:
+    char = character["character"]
+    category = classify_news_category(entry)
+    image_style = get_image_style_for_category(category)
+    
+    prompt = f"""あなたは「{char['name']}」というキャラクターです。
+PVニュースのXポスト用に、読者の手を止める日本語要約と、
+雑誌表紙のような画像プロンプトを生成してください。
+
+【キャラクター設定】
+- 名前: {char['name']}
+- 性格: {", ".join(char['personality'])}
+- スタイル: 静かに本質を見抜くPVコンサルの視点。データと業界知見で語る
+
+【今回のニュースカテゴリ】 {category}
+
+【最初の判定 - 極めて重要】
+このニュースが「PV(医薬品安全性監視)/医薬品/製薬業界」と
+直接関係あるかを判定してください。
+
+PVに関係ある例:
+- 医薬品の安全性管理、副作用監視、ICSR、シグナル検出
+- 製薬企業の戦略、組織変更、AI/DX導入
+- 規制制度(GVP省令、ICH ガイドライン、PMDA/FDA/EMA の発出)
+- 医薬品AI、製薬AI、医療AIの中で薬と関わるもの
+
+PVに関係ない例:
+- 一般的なIT企業のAIガバナンス
+- 物理学・化学の研究
+- 医療機関(病院)の運営の話で薬と無関係
+- 食品、化粧品、サプリメント
+- 一般的なAI規制の話で医薬品と無関係
+
+判定方法:
+- 原文に「医薬品」「製薬」「PV」「ファーマコビジランス」「副作用」
+  「ICSR」「シグナル検出」「FDA/EMA/PMDA」のいずれか、または
+  製薬企業名・医薬品関連の固有名詞が明示されている → "yes"
+- 原文に上記がなく、強引にPVに寄せないと書けない → "no"
+
+【出力形式】
+PVに関係ない場合(is_pv_related=false):
+{{
+  "is_pv_related": false,
+  "skip_reason": "なぜPVと無関係と判断したか短く記載"
+}}
+
+PVに関係ある場合(is_pv_related=true):
+{{
+  "is_pv_related": true,
+  "summary": "120-180字、フックのある日本語要約",
+  "image_prompt": "100-150 words、英語の画像プロンプト"
+}}
+
+【summary 設計指針(is_pv_related=true の時のみ)】
+読者(PVコンサル、製薬企業の安全性管理担当、規制当局関係者)の手を
+タイムライン上で止めることを最優先する。
+
+書き方:
+1. 冒頭1文目で「なぜこのニュースが面白いか」を提示する。
+   役所主語(「○○省は」「PMDAは」)で始めない。
+   ニュースの主役(薬、技術、企業、トレンド)を主語にする。
+2. コンサル目線の解釈、業界の見立て、構造分析を加えてよい。
+3. 数値・日付・固有名詞は原文に明記されている範囲で自由に使ってよい。
+   ただし**原文に書かれていないPV略語(ICSR/PSUR/RMP/PBRER等)を
+   無理に入れない**。原文がそれらに言及していなければ、フルスペル
+   または一般用語で記述する。
+4. 末尾の汎用的な締め(「医療従事者は確認すべき」「動向を注視」等)は禁止。
+5. 文末は「〜とのこと」「〜と報告されている」「〜と発表された」など。
+
+【厳守】
+- 原文が医薬品/PVと無関係なら、無理に医薬品の話に寄せず
+  is_pv_related=false で返すこと。これが最も重要。
+- 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」など)は禁止。
+
+【image_prompt 設計指針】
+ニュース内容を視覚化するため、3ステップを実行する:
+ステップ1: ニュースから具体的なオブジェクトを5つ以上抽出
+ステップ2: 人物が何をしている瞬間かを決める
+ステップ3: ステップ1とステップ2を組み合わせて image_prompt を書く
+
+スタイル指示(必ず以下の内容を image_prompt に含めること):
+{image_style}
+
+【image_prompt 必須要件】
+- 具体的なオブジェクトを3つ以上、画像内に配置
+- 「抽象的」「シンボリック」だけで終わらせず、具体的に何が映るかを書く
+- Aspect ratio: 16:9 landscape
+- NO text, NO letters, NO numbers, NO logos
+- NO real human faces (stylized anime-style faces required)
+- NO copyrighted Lupin III characters (Fujiko, Lupin, Jigen, Goemon, Zenigata)
+- Length: 100-150 English words
+
+【原文情報】
+タイトル: {entry['title']}
+要約: {entry['summary'][:1500]}
+ソース: {entry['source_name']}
+
+最初に is_pv_related の判定をしてから、JSON形式で出力してください。
+前後に説明文を付けないこと。
+"""
+    return prompt
 
 
 def generate_post_content(entry: dict, character: dict) -> dict:
