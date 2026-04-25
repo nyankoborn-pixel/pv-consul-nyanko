@@ -1,11 +1,13 @@
 """
 fetch_news.py - RSS feedからPVニュースを収集
+- User-Agent付きリクエストでGoogle News RSSのbotブロックを回避
+- Google NewsリダイレクトURLを実記事URLに解決(X OGPカード表示のため)
 """
 import feedparser
 import yaml
 import time
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dateutil import parser as date_parser
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
@@ -26,11 +28,30 @@ def parse_entry_date(entry) -> datetime:
     return datetime.now(timezone.utc)
 
 
-def fetch_all_sources(max_age_hours: int = 168, top_n: int = 10) -> list:
+def resolve_google_news_url(google_url: str, timeout: int = 10) -> str:
     """
-    各ソースから新着順 top_n 件を取得。日付フィルタは補助的にのみ適用。
+    Google News RSSのリダイレクトURLを実記事URLに解決。
+    X側でOGPカード(画像/動画/タイトル)を自動表示させるために必要。
+    Google News URL以外、または解決失敗時は元URLをそのまま返す。
     """
+    if not google_url or "news.google.com" not in google_url:
+        return google_url
+    try:
+        resp = requests.head(
+            google_url,
+            headers={"User-Agent": UA},
+            allow_redirects=True,
+            timeout=timeout,
+        )
+        return resp.url
+    except Exception as e:
+        print(f"  [resolve] failed: {e}")
+        return google_url
+
+
+def fetch_all_sources(max_age_hours: int = 168) -> list:
     sources = load_sources()
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
     all_entries = []
     
     for source in sources:
@@ -41,14 +62,19 @@ def fetch_all_sources(max_age_hours: int = 168, top_n: int = 10) -> list:
             raw = len(feed.entries)
             
             kept = 0
-            # 新着順top_n件だけ採用(日付フィルタなし)
-            for entry in feed.entries[:top_n]:
+            for entry in feed.entries[:20]:
+                published = parse_entry_date(entry)
+                if published < cutoff:
+                    continue
                 summary = entry.get("summary", "") or entry.get("description", "")
+                raw_link = entry.get("link", "")
+                resolved_link = resolve_google_news_url(raw_link)
+                
                 all_entries.append({
                     "title": entry.get("title", "").strip(),
                     "summary": summary.strip()[:1500],
-                    "link": entry.get("link", ""),
-                    "published": parse_entry_date(entry).isoformat(),
+                    "link": resolved_link,
+                    "published": published.isoformat(),
                     "source_name": source["name"],
                     "source_weight": source["weight"],
                     "source_category": source["category"],
@@ -66,3 +92,4 @@ def fetch_all_sources(max_age_hours: int = 168, top_n: int = 10) -> list:
 if __name__ == "__main__":
     for e in fetch_all_sources()[:5]:
         print(f"- [{e['source_name']}] {e['title']}")
+        print(f"  {e['link']}")
