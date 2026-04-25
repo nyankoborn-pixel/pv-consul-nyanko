@@ -3,6 +3,7 @@ score.py - ニュース記事のスコアリング
 - ソース重み + キーワード重み + 日付による補正
 - マイナス重みのキーワードがあれば実質除外
 - 重複(過去投稿済み)も除外
+- summary が短すぎる(会員限定記事のリード文のみ)記事を除外
 """
 import json
 import re
@@ -13,6 +14,10 @@ from pathlib import Path
 from dateutil import parser as date_parser
 
 POSTED_LOG = Path("logs/posted.jsonl")
+
+# summary がこの文字数未満の記事は「リード文しか取得できなかった」と判断して除外
+# 会員限定記事の事故的な引用を防ぐ
+MIN_SUMMARY_LENGTH = 100
 
 
 def load_keywords(config_path: str = "config/keywords.yml") -> list:
@@ -51,7 +56,6 @@ def calculate_keyword_score(text: str, keywords: list) -> tuple:
         keyword = entry["keyword"]
         weight = entry["weight"]
         
-        # 大文字小文字無視
         if keyword.lower() in text_lower:
             score += weight
             matched.append(keyword)
@@ -63,13 +67,6 @@ def calculate_recency_bonus(published_str: str) -> tuple:
     """
     記事の新しさによる補正
     Returns: (bonus_score, age_label)
-    
-    7日以内:    +5  (新鮮)
-    7-30日:    +0  (基準)
-    30-90日:   -5  (やや古い)
-    90-365日:  -15 (古い)
-    365日超:   -30 (実質除外)
-    日付不明:  -10 (古い扱いだが完全除外はしない)
     """
     if not published_str:
         return -10.0, "日付不明"
@@ -97,23 +94,45 @@ def calculate_recency_bonus(published_str: str) -> tuple:
         return -10.0, f"日付パース失敗"
 
 
+def is_summary_too_short(entry: dict) -> bool:
+    """
+    summary が短すぎる(会員限定記事のリード文のみ等)かを判定
+    タイトル+要約の合計が MIN_SUMMARY_LENGTH 未満なら、要約に十分な情報がないと判断
+    """
+    title = entry.get("title", "")
+    summary = entry.get("summary", "")
+    combined = f"{title} {summary}".strip()
+    return len(combined) < MIN_SUMMARY_LENGTH
+
+
 def score_entries(entries: list, config_path: str = "config/keywords.yml") -> list:
     """
     エントリ一覧をスコアリングして降順ソートで返す。
     マイナススコアの記事は除外。
     過去投稿済みの記事も除外。
+    summary が短すぎる記事も除外(ハルシネーション防止)。
     """
     keywords = load_keywords(config_path)
     posted_links = load_posted_links()
     
     scored = []
-    excluded_count = {"posted": 0, "negative_score": 0, "too_old": 0}
+    excluded_count = {
+        "posted": 0,
+        "negative_score": 0,
+        "too_old": 0,
+        "too_short": 0,
+    }
     
     for entry in entries:
         # 重複チェック
         link = entry.get("link", "")
         if link in posted_links:
             excluded_count["posted"] += 1
+            continue
+        
+        # summary が短すぎる(会員限定リード文等)→除外
+        if is_summary_too_short(entry):
+            excluded_count["too_short"] += 1
             continue
         
         # ソース重み
@@ -155,10 +174,5 @@ def score_entries(entries: list, config_path: str = "config/keywords.yml") -> li
     print(f"[score] Scored: {len(scored)} entries")
     print(f"[score] Excluded: posted={excluded_count['posted']}, "
           f"negative_score={excluded_count['negative_score']}, "
-          f"too_old={excluded_count['too_old']}")
-    
-    return scored
-
-
-if __name__ == "__main__":
-    print("score module loaded.")
+          f"too_old={excluded_count['too_old']}, "
+          f"too_short={excluded_count['too_
