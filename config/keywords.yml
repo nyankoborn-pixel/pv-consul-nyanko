@@ -1,9 +1,10 @@
 # 話題性スコアリング用キーワード重み
 # タイトル+要約内の出現をチェック(大文字小文字無視)
-# マイナス重みは「除外」を意味する(該当キーワードがあれば実質投稿対象外)
+# マイナス重みは「除外」を意味する
+# 略語(RMP, PSUR等)は他領域と衝突するため、単独では加点しない
 
 high_impact:
-  # ===== カテゴリ1: 製薬企業のPV戦略・組織動向(重み9-10) =====
+  # ===== カテゴリ1: 製薬企業のPV戦略・組織動向 =====
   
   # 日本大手
   - keyword: "武田薬品"
@@ -55,7 +56,7 @@ high_impact:
   - keyword: "イーライリリー"
     weight: 5
   
-  # PV戦略を示す語(企業名と組み合わさってヒットする想定)
+  # PV戦略を示す語(企業名と組み合わさってヒット想定)
   - keyword: "PV戦略"
     weight: 8
   - keyword: "PV組織"
@@ -64,8 +65,10 @@ high_impact:
     weight: 7
   - keyword: "ファーマコビジランス"
     weight: 7
+  - keyword: "医薬品安全性監視"
+    weight: 8
   
-  # ===== カテゴリ2: コンサル業界動向(重み8-9) =====
+  # ===== カテゴリ2: コンサル業界動向 =====
   
   - keyword: "デロイト"
     weight: 6
@@ -92,7 +95,9 @@ high_impact:
   - keyword: "BCG"
     weight: 6
   
-  # ===== カテゴリ3: 規制制度・ガイダンス(重み8-10) =====
+  # ===== カテゴリ3: 規制制度・ガイダンス =====
+  # 注: RMP, PSUR等の略語は単独では加点しない(他領域との衝突防止)
+  # フルスペルでのみ加点する
   
   - keyword: "GVP省令"
     weight: 10
@@ -105,19 +110,19 @@ high_impact:
   - keyword: "厚生労働省"
     weight: 6
   - keyword: "ガイドライン"
-    weight: 7
-  - keyword: "ガイダンス"
-    weight: 7
-  - keyword: "通知"
     weight: 5
+  - keyword: "ガイダンス"
+    weight: 5
+  - keyword: "通知"
+    weight: 4
   - keyword: "通達"
-    weight: 6
+    weight: 5
   - keyword: "発出"
-    weight: 6
+    weight: 5
   - keyword: "パブリックコメント"
-    weight: 7
+    weight: 6
   - keyword: "パブコメ"
-    weight: 7
+    weight: 6
   - keyword: "ICH E2B"
     weight: 10
   - keyword: "ICH E2C"
@@ -126,79 +131,66 @@ high_impact:
     weight: 9
   - keyword: "ICH E2E"
     weight: 9
-  - keyword: "ICH"
-    weight: 7
-  - keyword: "PSUR"
-    weight: 9
-  - keyword: "PBRER"
-    weight: 9
-  - keyword: "DSUR"
+  - keyword: "ICH ガイドライン"
     weight: 8
-  - keyword: "RMP"
-    weight: 9
   - keyword: "リスク管理計画"
+    weight: 9
+  - keyword: "定期的安全性最新報告"
     weight: 9
   - keyword: "製造販売後調査"
     weight: 7
   - keyword: "市販後調査"
     weight: 7
   - keyword: "再評価"
-    weight: 6
+    weight: 5
   - keyword: "再審査"
-    weight: 6
+    weight: 5
   - keyword: "シグナル検出"
-    weight: 8
-  - keyword: "ICSR"
     weight: 8
   - keyword: "個別症例報告"
     weight: 8
+  - keyword: "ICSR"
+    weight: 7
   
-  # ===== カテゴリ4: AI/DX 活用(重み8-10) =====
+  # ===== カテゴリ4: AI/DX 活用 =====
+  # 注: AI単独は重み下げ、PV関連語との複合でしか上位に来ないように
   
   - keyword: "生成AI"
-    weight: 9
+    weight: 6
   - keyword: "LLM"
-    weight: 9
+    weight: 6
   - keyword: "大規模言語モデル"
-    weight: 9
+    weight: 7
   - keyword: "機械学習"
-    weight: 7
+    weight: 5
   - keyword: "ディープラーニング"
-    weight: 7
+    weight: 5
   - keyword: "AIガードレール"
-    weight: 9
-  - keyword: "AIガバナンス"
-    weight: 9
-  - keyword: "AI倫理"
     weight: 7
+  - keyword: "AIガバナンス"
+    weight: 7
+  - keyword: "AI倫理"
+    weight: 6
   - keyword: "自動化"
-    weight: 6
+    weight: 4
   - keyword: "DX"
-    weight: 5
+    weight: 4
   - keyword: "デジタルトランスフォーメーション"
-    weight: 5
+    weight: 4
   - keyword: "RPA"
-    weight: 6
+    weight: 5
   - keyword: "製薬DX"
     weight: 8
   - keyword: "医薬品AI"
     weight: 9
   
-  # 英語キーワード
-  - keyword: "artificial intelligence"
-    weight: 7
-  - keyword: "machine learning"
-    weight: 6
-  - keyword: "generative AI"
-    weight: 8
+  # 英語キーワード(PV特化)
   - keyword: "AI in pharmacovigilance"
     weight: 10
-  - keyword: "AI governance"
-    weight: 7
-  - keyword: "AI guardrail"
-    weight: 8
   - keyword: "pharmacovigilance"
-    weight: 6
+    weight: 7
+  - keyword: "drug safety"
+    weight: 7
   - keyword: "case processing"
     weight: 6
   - keyword: "signal management"
@@ -206,14 +198,24 @@ high_impact:
   - keyword: "signal detection"
     weight: 7
   - keyword: "adverse event reporting"
-    weight: 6
+    weight: 7
+  - keyword: "AI governance"
+    weight: 5
+  - keyword: "AI guardrail"
+    weight: 5
+  - keyword: "machine learning"
+    weight: 4
+  - keyword: "generative AI"
+    weight: 5
+  - keyword: "artificial intelligence"
+    weight: 4
   
-  # ===== カテゴリ5: 中国 PV 動向(重み7-9) =====
+  # ===== カテゴリ5: 中国 PV 動向 =====
   
   - keyword: "NMPA"
     weight: 9
   - keyword: "CDE"
-    weight: 7
+    weight: 6
   - keyword: "中国 医薬品規制"
     weight: 8
   - keyword: "中国 GVP"
@@ -237,7 +239,7 @@ high_impact:
   - keyword: "中国製薬 グローバル"
     weight: 7
   
-  # ===== カテゴリ6: システム・ベンダー(重み5-7) =====
+  # ===== カテゴリ6: システム・ベンダー =====
   
   - keyword: "Argus"
     weight: 7
@@ -255,12 +257,8 @@ high_impact:
     weight: 5
   - keyword: "Annex 11"
     weight: 5
-  - keyword: "CSV"
-    weight: 5
-  - keyword: "CSA"
-    weight: 5
   
-  # ===== 除外キーワード(マイナス重み:実質除外) =====
+  # ===== 除外キーワード(マイナス重み) =====
   
   # 個別品目の改訂・回収系
   - keyword: "使用上の注意の改訂"
@@ -294,4 +292,18 @@ high_impact:
   - keyword: "回収命令"
     weight: -100
   - keyword: "緊急安全性情報"
+    weight: -50
+  
+  # PV以外領域での誤マッチ防止
+  - keyword: "Reviews of Modern Physics"
+    weight: -100
+  - keyword: "二次元磁性"
+    weight: -100
+  - keyword: "磁性研究"
+    weight: -100
+  - keyword: "物性研究"
+    weight: -50
+  - keyword: "物理学"
+    weight: -50
+  - keyword: "F5 AI Guardrails"
     weight: -50
