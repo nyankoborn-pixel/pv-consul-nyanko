@@ -172,7 +172,4 @@ def score_entries(entries: list, config_path: str = "config/keywords.yml") -> li
     scored.sort(key=lambda x: x["score"], reverse=True)
     
     print(f"[score] Scored: {len(scored)} entries")
-    print(f"[score] Excluded: posted={excluded_count['posted']}, "
-          f"negative_score={excluded_count['negative_score']}, "
-          f"too_old={excluded_count['too_old']}, "
-          f"too_short={excluded_count['too_
+    print(f"[score] Excluded: posted={excluded_count['posted']}, negative_score={excluded_count['negative_score']}, too_old={excluded_count['too_old']}, too_short={excluded_count['too_short']}")
