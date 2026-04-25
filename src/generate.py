@@ -84,9 +84,6 @@ No readable signs, no logos, no text.
 
 
 Required Specifications:
-- fetish pose
-- Drenched in sweat
-- M-shaped open leg pose
 - No subject under 20 years old
 
 ABSOLUTE PROHIBITIONS:
