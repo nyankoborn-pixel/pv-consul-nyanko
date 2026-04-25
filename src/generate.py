@@ -43,88 +43,94 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: ライン主体ミニマル + シルエット人物 + 禁止語強化
-    Christoph Niemann / Noma Bar / NYT editorial illustration の系譜
+    画像スタイル: モダン・エディトリアル・コミック調
+    The Rundown AI 寄りの、迫力ある一枚絵を狙う
     """
     common_style = (
-        "Style: Minimalist editorial line illustration in the style of "
-        "Christoph Niemann, Noma Bar, or The New York Times editorial section. "
-        "Clean geometric lines, strong silhouettes, limited color palette: "
-        "deep navy blue (#0E1B2E) as primary, gold (#C89D44) accent, off-white "
-        "background. Strong negative space. Bold composition with clear focal point. "
-        "Slightly surreal, conceptually witty. No photorealism. No 3D rendering. "
-        "Flat or 2.5D illustration only."
+        "Style: Modern editorial illustration with comic book influence. "
+        "Vibrant, dramatic, cinematic lighting. Bold composition with a clear "
+        "focal subject taking up significant canvas space. Rich color palette "
+        "centered on deep navy blue (#0E1B2E) and warm gold (#C89D44), with "
+        "ONE additional bold accent color (electric blue, crimson red, or "
+        "emerald green) used dramatically. Strong shadows and highlights. "
+        "Stylized but expressive — think editorial covers of WIRED, "
+        "Bloomberg Businessweek, or Pop-Sci magazine. NOT minimalist, "
+        "NOT flat-vector. Painterly digital illustration with depth."
     )
     
     figure_directive = (
-        "MANDATORY: Always include ONE stylized human silhouette figure as the "
-        "focal point. Show the figure from the back, side, or partial view - "
-        "NEVER show the face clearly. The figure must be DOING SOMETHING SPECIFIC "
-        "that visualizes the news theme (examining, signing, presenting, observing, "
-        "deciding, reaching, holding). The silhouette should be filled with a flat "
-        "navy color, with gold accent details only on key elements."
+        "INCLUDE a stylized human figure as the focal point. The figure should "
+        "have a clear pose and expression conveying the news theme — confident, "
+        "concerned, contemplative, or determined. Show the face, but stylize "
+        "it (anime/comic/painterly style) so it doesn't look like a specific "
+        "real person. The figure should occupy 30-50% of the canvas. They "
+        "should be ACTIVELY DOING something (holding, examining, presenting, "
+        "deciding) — not just standing."
+    )
+    
+    background_directive = (
+        "BACKGROUND must be richly described, not empty. Include a clear "
+        "setting that adds context: institutional architecture, scientific "
+        "environment, abstract symbolic space, or dramatic atmospheric scene. "
+        "Use depth, shadows, and atmospheric lighting. The background should "
+        "amplify the news theme."
     )
     
     hard_forbidden = (
-        "DO NOT use any of the following (these are overused clichés): "
-        "- Blue gradient backgrounds with particles or light streaks "
-        "- Medical pills, capsules, tablets, or pill bottles "
-        "- Molecular structures, DNA helix, atoms, or cells "
-        "- Glowing neon AI effects, hexagonal grids, circuit boards "
-        "- Stethoscope, lab coat, microscope, syringe, white-coated doctor "
-        "- Caduceus medical symbol, red cross, hospital cross "
+        "DO NOT use: "
+        "- Minimalist line art or simple geometric shapes "
+        "- Empty white/cream backgrounds with negative space "
+        "- Flat 2D vector illustration aesthetics "
+        "- Silhouette-only figures without faces or expressions "
+        "- Generic medical pills, capsules, molecular structures "
+        "- Stethoscope, lab coat, white-coated doctor clichés "
+        "- Caduceus, red cross, hospital cross "
         "- Round symmetrical centered compositions "
-        "- 3D rendering, photorealistic textures, glossy reflections "
-        "- Generic 'business professional' clipart aesthetics "
-        "- Brain made of circuits, glowing neural networks"
+        "- Abstract data visualizations as the main subject"
     )
     
     category_scenes = {
         "regulatory": (
-            "Scene direction: A figure examining or signing an oversized document/seal. "
-            "Or a figure standing before a wall of paper/regulations that dwarfs them. "
-            "Or a figure pulling a thread that connects multiple institutional buildings. "
-            "The composition should convey 'oversight', 'authority shifting', or "
-            "'new rules being written'. The document/regulation should be visually "
-            "abstracted (geometric shapes, lines) - never literal text."
+            "Scene: A determined regulator/official figure in a dramatic "
+            "institutional setting — perhaps holding an oversized seal or "
+            "document, gesturing toward a blueprint, or standing before "
+            "monumental architectural columns. Strong sense of authority and "
+            "consequence. Cinematic lighting from a window or overhead source. "
+            "The composition should feel like a key scene in a political drama."
         ),
         "ai_tech": (
-            "Scene direction: A figure interacting with an abstract geometric form "
-            "that represents AI - lines emerging from their hand, a geometric mesh "
-            "they're shaping, or a single luminous gold shape they're examining. "
-            "Or a figure facing away from the viewer, looking at an abstract pattern "
-            "of lines/grids that extends beyond the frame. Avoid all literal "
-            "computer/screen/circuit imagery. AI should be represented by ABSTRACT "
-            "GEOMETRY (lines, dots, simple forms) only."
+            "Scene: A scientist or engineer figure interacting with a "
+            "spectacular AI manifestation — a glowing geometric construct, "
+            "data tendrils, or a holographic interface. The figure should look "
+            "fascinated, focused, or slightly awed. Dark dramatic environment "
+            "with the AI element as the bright focal glow. Cinematic, slightly "
+            "futuristic but grounded."
         ),
         "market_business": (
-            "Scene direction: A figure mid-action in a strategic moment - moving a "
-            "large geometric piece, balancing on a tilted shape, climbing or "
-            "descending an abstract structure. Or two silhouette figures in a "
-            "moment of negotiation or confrontation. The composition should convey "
-            "'consequence', 'decision', or 'shifting power'. Avoid corporate office "
-            "settings; use abstract geometric environments."
+            "Scene: An executive figure in a moment of strategic action — "
+            "moving large physical pieces (chess-like, or abstract architectural "
+            "blocks), studying a complex map, or pointing decisively. Rich "
+            "boardroom-like or abstract corporate landscape. The composition "
+            "should convey high-stakes consequence."
         ),
         "china": (
-            "Scene direction: A figure with subtle nods to East Asian aesthetic "
-            "elements (cleanly stylized, never stereotypical) interacting with "
-            "abstract geometric forms. Possibly using ink-wash inspired brush "
-            "strokes for accent details only. Avoid dragons, lanterns, pandas, or "
-            "any cliché Chinese imagery. Keep it minimal and respectful - the "
-            "Asian context should be subtle, conveyed through composition rhythm "
-            "and a single stylized accent rather than overt symbols."
+            "Scene: A figure with East Asian features (stylized, respectful, "
+            "not stereotypical) in a setting blending traditional Chinese "
+            "architectural elements with modern pharmaceutical/technological "
+            "aesthetics. Avoid cliché dragons, lanterns, or pandas. Use "
+            "ink-wash inspired textures combined with sharp modern composition."
         ),
         "general": (
-            "Scene direction: A figure in a moment of focused action that "
-            "represents the news theme. Find a specific verb (examining, "
-            "weighing, choosing, reaching) and build the composition around it. "
-            "Use abstract geometric forms as the figure's environment."
+            "Scene: A pharmaceutical industry figure (researcher, executive, "
+            "regulator) in a dramatic moment of action representing the news "
+            "theme. Strong character pose, clear emotion, rich atmospheric "
+            "background."
         ),
     }
     
     scene = category_scenes.get(category, category_scenes["general"])
     
-    return f"{common_style} {figure_directive} {scene} {hard_forbidden}"
+    return f"{common_style} {figure_directive} {background_directive} {scene} {hard_forbidden}"
 
 
 def build_prompt(entry: dict, character: dict) -> str:
