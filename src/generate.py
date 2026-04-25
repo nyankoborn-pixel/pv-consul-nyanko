@@ -90,15 +90,14 @@ Modern city street at night with tall buildings, glass facades, wet reflective p
 blurred traffic lights, and atmospheric depth.
 No readable signs, no logos, no text.
 
+
+Required Specifications:
+- fetish pose
+
 ABSOLUTE PROHIBITIONS:
-- No nudity
-- No explicit sexual content
-- No fetish pose
-- No direct imitation of celebrities, real people, or fictional characters
 - No anime, manga, cartoon, comic, or illustration style
 - No logos, no readable text, no letters, no numbers
 - No multiple people
-- No subject under 25 years old
 """.strip()
 
     category_scenes = {
