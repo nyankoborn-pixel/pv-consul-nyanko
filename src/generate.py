@@ -1,7 +1,7 @@
 """
 generate.py - Gemini で要約+画像プロンプト+画像を生成
 The Rundown AI 型: 親ポストに画像、自リプライにソースURL
-画像路線: ルパン三世風アニメ(Monkey Punch / TMS Entertainment 1970s-90s)
+画像路線: 夜景 × 歩き × 低めアングル × 高級ファッション写真
 PV関連性判定: 記事がPV/医薬品と無関係なら投稿スキップ
 """
 import os
@@ -43,54 +43,112 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: 1980年代OVA / 劇場版アニメ作画
-    押井守『うる星やつら2 ビューティフル・ドリーマー』、ヤマト2199、
-    パトレイバー、カウボーイビバップ系の高品質セルアニメ作画
+    画像スタイル: 夜景 × 歩き × 低めアングル × 高級ファッション写真
     """
-    return """
-STYLE: 1980s Japanese theatrical OVA anime, Mamoru Oshii era 
-"Urusei Yatsura 2: Beautiful Dreamer" (1984), Studio Pierrot / 
-Sunrise / Madhouse golden age. Hand-drawn cel animation with 
-high-quality pencil work. Detailed shading with multiple cel-shadow 
-layers. Painterly background art. Mature adult-anime aesthetic — 
-NOT modern anime (Demon Slayer / Jujutsu Kaisen 
-era).
+    base_style = """
+STYLE:
+Hyperrealistic cinematic fashion photography, ultra-detailed, high-end editorial look.
+Shot like a luxury magazine campaign or cinematic key visual.
+Shallow depth of field, realistic skin texture, natural hair movement, realistic fabric texture.
+NOT anime, NOT manga, NOT illustration, NOT 3D rendering, NOT comic art.
 
-East Asian woman.
+SUBJECT:
+A single East Asian woman in her late 20s to early 40s.
+She has a confident, composed, fashion-forward presence.
+Her face is original and must not resemble any real celebrity, model, public figure, or fictional character.
+She should look mature, elegant, and charismatic.
 
+POSE:
+She is walking forward, captured mid-stride with natural movement in her posture, hair, and clothing.
+One leg is naturally stepping forward.
+Her body is slightly angled, creating a strong elegant silhouette.
+Her expression is calm, confident, and poised.
+The pose should feel like a fashion editorial walking shot, not a static studio pose.
 
-COMPOSITION: 3/4 view or front-facing portrait composition where 
-her face occupies 20-30% of canvas (face must be prominent and 
-clearly drawn). Show torso and at least to the hips, ideally full 
-body if pose allows. Dynamic angle — slight tilt, looking back over 
-shoulder, or leaning with attitude. NEVER flat headshot, NEVER pure 
-profile (side view), NEVER faceless silhouette.
+WARDROBE:
+A sleek, modern, well-fitted high-fashion outfit.
+Preferred styling: a black satin evening dress with a tasteful slit,
+or a sophisticated fitted dress in deep red, black, metallic gold, or rich jewel tones.
+The outfit should be stylish, polished, and editorial.
+Avoid explicit sexual styling.
 
-WARDROBE: Stylish 1980s anime fashion — could be a sleek dress, 
-sharp suit jacket over silk blouse, or sophisticated casual outfit. 
-Natural color palette with one bold accent. Should feel adult and 
-elegant, not childish.
+CAMERA:
+Aspect ratio: 16:9 landscape.
+Camera positioned slightly below eye level, creating a powerful but natural perspective.
+Full body or three-quarter body framing.
+The subject should occupy 40-60% of the frame.
 
-LIGHTING: Cinematic mood lighting — could be golden hour through 
-windows, neon city night, soft indoor lamp light, or atmospheric 
-twilight. Use multiple light sources creating depth. Strong cel 
-highlights on hair (signature 80s anime hair-shine). NOT flat, 
-NOT overly dark.
+LIGHTING:
+Urban night scene with city lights and soft backlighting.
+Gentle edge light around the silhouette.
+Subtle reflections on fabric under city lights.
+Cinematic bokeh in the background.
+Dramatic but tasteful contrast.
 
-BACKGROUND: Detailed painterly background art (Yoshinori Kanada / 
-Hiroshi Ono / Mamoru Oshii style) — atmospheric Tokyo cityscape at 
-dusk/night, sophisticated interior, library, observatory, or 
-moody architectural space. Background should feel rich and lived-in, 
-contributing to the cinematic mood.
+BACKGROUND:
+Modern city street at night with tall buildings, glass facades, wet reflective pavement,
+blurred traffic lights, and atmospheric depth.
+No readable signs, no logos, no text.
 
 ABSOLUTE PROHIBITIONS:
-- Modern anime style (Demon Slayer, Jujutsu Kaisen, Naruto era)
-- Western painted comic styles (Alex Ross, Marvel)
-- Minimalist line art or flat vector
-- Static both-feet-together poses, pure side profiles, faceless silhouettes
-- Daylight studio shots, empty white backgrounds
-- Text, letters, numbers, logos, readable signage in image
+- No nudity
+- No explicit sexual content
+- No fetish pose
+- No direct imitation of celebrities, real people, or fictional characters
+- No anime, manga, cartoon, comic, or illustration style
+- No logos, no readable text, no letters, no numbers
+- No multiple people
+- No subject under 25 years old
 """.strip()
+
+    category_scenes = {
+        "regulatory": """
+CATEGORY SCENE:
+Integrate subtle regulatory or pharmaceutical governance elements into the environment:
+sealed document folders, official-looking binders, a glass corporate building,
+a refined government-office atmosphere, or abstract compliance-related objects.
+These objects must not contain readable text.
+The woman walks forward as if leaving a high-stakes regulatory meeting.
+""".strip(),
+
+        "ai_tech": """
+CATEGORY SCENE:
+Integrate subtle AI and technology elements:
+blurred data dashboards on glass screens, server-room reflections, abstract interface lights,
+advanced lab equipment, or modern workstation silhouettes.
+No readable text, no numbers, no logos.
+The woman walks through a futuristic pharmaceutical AI environment at night.
+""".strip(),
+
+        "market_business": """
+CATEGORY SCENE:
+Integrate business and market elements:
+a high-floor corporate district, glass towers, executive lobby reflections,
+presentation folders, sleek boardroom materials, or city skyline through glass.
+No readable text, no numbers, no logos.
+The woman walks forward with executive confidence in a luxury business setting.
+""".strip(),
+
+        "china": """
+CATEGORY SCENE:
+Integrate a modern East Asian pharmaceutical business environment:
+Shanghai or Beijing-inspired high-rise city lights, glass research facilities,
+corporate lobby reflections, or modern biotech campus atmosphere.
+Avoid traditional cultural clichés.
+No readable text, no numbers, no logos.
+""".strip(),
+
+        "general": """
+CATEGORY SCENE:
+Create a visually striking pharmaceutical business news image:
+modern city night, cinematic reflections, elegant corporate atmosphere,
+and subtle objects related to the article.
+No readable text, no numbers, no logos.
+""".strip(),
+    }
+
+    return f"{base_style}\n\n{category_scenes.get(category, category_scenes['general'])}"
+
 
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
@@ -160,7 +218,7 @@ PVに関係ある場合(is_pv_related=true):
 4. 文末は「〜とのこと」「〜と報告されている」「〜と発表された」など。
 
 【極めて重要な制約 - ハルシネーション防止】
-**summary には、原文に明示的に書かれている事実だけを記述すること。**
+summary には、原文に明示的に書かれている事実だけを記述すること。
 以下を絶対に書かないこと:
 - 原文に書かれていない「業界の見立て」「構造分析」「推測」「示唆」
 - 原文に書かれていない他の制度・施策との「連動」「影響」「波及」
@@ -170,7 +228,7 @@ PVに関係ある場合(is_pv_related=true):
 
 原文が短いリード文しかなくても、それで書ける範囲だけで要約すること。
 情報量が足りないと感じても、推測で補ってはならない。
-要約が短くなる場合はそれでよい(120字未満でも可)。
+要約が短くなる場合はそれでよい。
 
 【厳守】
 - 原文が医薬品/PVと無関係なら、無理に医薬品の話に寄せず
@@ -190,9 +248,11 @@ PVに関係ある場合(is_pv_related=true):
 - 具体的なオブジェクトを3つ以上、画像内に配置
 - 「抽象的」「シンボリック」だけで終わらせず、具体的に何が映るかを書く
 - Aspect ratio: 16:9 landscape
+- Photorealistic original human face required
+- The face must not resemble any real celebrity, model, public figure, or fictional character
+- NO anime, NO manga, NO cartoon, NO comic art, NO illustration
+- NO nudity, NO explicit sexual content, NO fetish pose
 - NO text, NO letters, NO numbers, NO logos
-- NO real human faces (stylized anime-style faces required)
-- NO copyrighted Lupin III characters (Fujiko, Lupin, Jigen, Goemon, Zenigata)
 - Length: 100-150 English words
 
 【原文情報】
@@ -237,7 +297,6 @@ def generate_post_content(entry: dict, character: dict) -> dict:
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Failed to parse Gemini JSON output: {e}\nRaw: {text}")
     
-    # PV関連性判定
     if result.get("is_pv_related") is False:
         skip_reason = result.get("skip_reason", "PVと無関係と判定")
         raise PVNotRelatedError(f"Skipped: {skip_reason}")
@@ -250,7 +309,7 @@ def generate_post_content(entry: dict, character: dict) -> dict:
 
 
 class PVNotRelatedError(Exception):
-    """記事がPVと無関係と判定された場合のエラー(次の候補に進むためのシグナル)"""
+    """記事がPVと無関係と判定された場合のエラー"""
     pass
 
 
@@ -287,8 +346,7 @@ def select_hashtags(entry: dict, character: dict) -> list:
 
 def compose_post(entry: dict, gen: dict, character: dict) -> str:
     """
-    親ポストの本文を組み立て(画像とリプライURLは別途扱う)
-    優先順位: summary > hashtags
+    親ポストの本文を組み立て
     """
     tags = select_hashtags(entry, character)
     hashtags_str = " ".join(tags)
@@ -317,7 +375,7 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
 
 def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") -> str:
     """
-    Gemini 2.5 Flash Image (Nano Banana) で画像生成 (新SDK使用)
+    Gemini 2.5 Flash Image で画像生成
     """
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
