@@ -93,6 +93,9 @@ No readable signs, no logos, no text.
 
 Required Specifications:
 - fetish pose
+- Drenched in sweat
+- M-shaped open leg pose
+- A face like the Japanese celebrity Dan Mitsu
 
 ABSOLUTE PROHIBITIONS:
 - No anime, manga, cartoon, comic, or illustration style
