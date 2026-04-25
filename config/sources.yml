@@ -1,6 +1,4 @@
-# PVニュースソース設定 - 規制・AI/DX・企業戦略重視
-# Bossの関心領域: PV制度、AI/DX、企業のPV戦略、コンサル動向、中国PV
-# 除外領域: 個別品目の添付文書改訂、副作用追加、回収
+# PVニュースソース設定 - PV専業を最優先、隣接領域(AI全般)は低優先度
 
 sources:
   # ===== 製薬企業 PV戦略・組織動向(日本) =====
@@ -46,22 +44,34 @@ sources:
     weight: 9
     category: "regulatory_jp"
   
-  # ===== AI/DX 活用(日本) =====
+  # ===== AI/DX 活用(PV専業: 複合キーワードで純粋PV+AIに絞る) =====
   
-  - name: "PV AI 日本"
-    url: "https://news.google.com/rss/search?q=%28%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%89%AF%E4%BD%9C%E7%94%A8%E7%9B%A3%E8%A6%96+OR+%E5%AE%89%E5%85%A8%E6%80%A7%29+%28AI+OR+%E7%94%9F%E6%88%90AI+OR+LLM+OR+%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%29&hl=ja&gl=JP&ceid=JP:ja"
+  - name: "PV AI(専業)"
+    url: "https://news.google.com/rss/search?q=%28%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%89%AF%E4%BD%9C%E7%94%A8%E7%9B%A3%E8%A6%96+OR+%E5%80%8B%E5%88%A5%E7%97%87%E4%BE%8B%E5%A0%B1%E5%91%8A+OR+%E5%8C%BB%E8%96%AC%E5%93%81%E5%AE%89%E5%85%A8%E6%80%A7+OR+%E3%82%B7%E3%82%B0%E3%83%8A%E3%83%AB%E6%A4%9C%E5%87%BA%29+%28AI+OR+%E7%94%9F%E6%88%90AI+OR+LLM+OR+%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 10
     category: "pv_ai_jp"
   
-  - name: "製薬DX 自動化"
-    url: "https://news.google.com/rss/search?q=%E8%A3%BD%E8%96%AC+%28DX+OR+%E8%87%AA%E5%8B%95%E5%8C%96+OR+%E7%94%9F%E6%88%90AI%29&hl=ja&gl=JP&ceid=JP:ja"
-    weight: 8
-    category: "pv_ai_jp"
-  
-  - name: "ICSR 自動化 AI"
+  - name: "ICSR 自動化"
     url: "https://news.google.com/rss/search?q=ICSR+%28AI+OR+%E8%87%AA%E5%8B%95%E5%8C%96+OR+%E5%80%8B%E5%88%A5%E7%97%87%E4%BE%8B%E5%A0%B1%E5%91%8A%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 9
     category: "pv_ai_jp"
+  
+  - name: "製薬 AI 活用"
+    url: "https://news.google.com/rss/search?q=%E8%A3%BD%E8%96%AC+%28%E7%94%9F%E6%88%90AI+OR+LLM%29+%28%E5%AE%89%E5%85%A8%E6%80%A7+OR+%E5%89%AF%E4%BD%9C%E7%94%A8+OR+%E5%93%81%E8%B3%AA%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 8
+    category: "pv_ai_jp"
+  
+  # ===== 隣接領域: AI ガバナンス・規制(優先度低) =====
+  
+  - name: "AI ガバナンス 隣接"
+    url: "https://news.google.com/rss/search?q=%28AI%E3%82%AC%E3%83%90%E3%83%8A%E3%83%B3%E3%82%B9+OR+AI%E3%82%AC%E3%83%BC%E3%83%89%E3%83%AC%E3%83%BC%E3%83%AB+OR+AI%E8%A6%8F%E5%88%B6%29+%28%E5%8C%BB%E7%99%82+OR+%E5%88%B6%E8%96%AC+OR+%E3%83%98%E3%83%AB%E3%82%B9%E3%82%B1%E3%82%A2%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 5
+    category: "ai_adjacent"
+  
+  - name: "医療AI 規制動向"
+    url: "https://news.google.com/rss/search?q=%E5%8C%BB%E7%99%82AI+%28%E8%A6%8F%E5%88%B6+OR+%E3%82%AC%E3%82%A4%E3%83%89%E3%83%A9%E3%82%A4%E3%83%B3+OR+%E5%80%AB%E7%90%86%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 5
+    category: "ai_adjacent"
   
   # ===== 中国 PV 動向 =====
   
