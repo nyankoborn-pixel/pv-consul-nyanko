@@ -2,6 +2,8 @@
 main.py - オーケストレーター
 フロー: fetch → score → generate(text+image_prompt) → validate → 
        generate_image → post(parent with image) → post_reply(source URL) → log
+
+PV関連性判定により無関係な記事はスキップして次の候補に進む。
 """
 import json
 import sys
@@ -16,14 +18,15 @@ from generate import (
     generate_post_content,
     compose_post,
     generate_image,
+    PVNotRelatedError,
 )
 from validate import validate_post
 from post_x import post_to_x, post_reply
 
 
 POSTED_LOG = Path("logs/posted.jsonl")
-MAX_RETRIES = 3
-REPLY_DELAY_SEC = 5  # 親ポスト→リプライの間隔
+MAX_RETRIES = 5  # PV無関係スキップが増える可能性があるため拡大
+REPLY_DELAY_SEC = 5
 
 
 def log_post(record: dict):
@@ -68,11 +71,16 @@ def run(dry_run: bool = False) -> int:
     # 3. 上位候補で生成・検証
     successful_entry = None
     successful_post = None
+    skip_count = 0
     
     for i, entry in enumerate(scored[:MAX_RETRIES]):
         print(f"\n--- Attempt {i+1}: {entry['title'][:80]} ---")
         try:
             result = try_generate_and_validate(entry, character)
+        except PVNotRelatedError as e:
+            print(f"  ⊘ Skipped (PV無関係): {e}")
+            skip_count += 1
+            continue
         except Exception as e:
             print(f"  ⚠ Generation failed: {e}")
             continue
@@ -91,7 +99,7 @@ def run(dry_run: bool = False) -> int:
         break
     
     if not successful_post:
-        print("\n⚠ No valid post could be generated. Exiting.")
+        print(f"\n⚠ No valid post could be generated. Skipped(PV無関係)={skip_count}件. Exiting.")
         return 1
     
     post_text = successful_post["post"]
@@ -129,7 +137,7 @@ def run(dry_run: bool = False) -> int:
         print(f"⚠ Parent post failed: {e}")
         return 1
     
-    # 6. 自リプライ投稿(ソースURLでXカード生成を狙う)
+    # 6. 自リプライ投稿
     reply_result = None
     if source_url:
         time.sleep(REPLY_DELAY_SEC)
@@ -151,6 +159,7 @@ def run(dry_run: bool = False) -> int:
         "post_text": post_text,
         "image_prompt": image_prompt,
         "had_image": bool(image_path),
+        "skipped_pv_unrelated": skip_count,
         "parent_tweet_id": parent_id,
         "parent_tweet_url": result["url"],
         "reply_tweet_id": reply_result["tweet_id"] if reply_result else None,
