@@ -46,8 +46,8 @@ def run(dry_run: bool = False) -> int:
     
     character = load_character()
     
-    # 1. ニュース収集
-    entries = fetch_all_sources(max_age_hours=48)
+    # 1. ニュース収集 (1週間以内の記事を対象。日本語ソースの取りこぼし防止)
+    entries = fetch_all_sources(max_age_hours=168)
     if not entries:
         print("⚠ No entries fetched. Exiting.")
         return 1
