@@ -185,4 +185,147 @@ The Economist や The New Yorker の表紙のような、見る人を立ち止�
 上記の原文情報のみを根拠として、JSONを出力してください。
 画像プロンプトでは、このニュースの本質を象徴する**1つの強い視覚的隠喩**を必ず考案してください。
 """
-    return promp
+    return prompt
+
+
+def generate_post_content(entry: dict, character: dict) -> dict:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY environment variable is not set")
+    
+    genai.configure(api_key=api_key)
+    
+    model = genai.GenerativeModel(
+        "gemini-2.5-flash",
+        generation_config={
+            "temperature": 0.85,  # 創造性を上げる(0.7 → 0.85)
+            "top_p": 0.95,
+            "max_output_tokens": 2000,
+            "response_mime_type": "application/json",
+        },
+    )
+    
+    prompt = build_prompt(entry, character)
+    response = model.generate_content(prompt)
+    text = response.text.strip()
+    
+    import json
+    import re
+    text = re.sub(r"^```(?:json)?\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+    
+    try:
+        result = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Failed to parse Gemini JSON output: {e}\nRaw: {text}")
+    
+    if "summary" not in result or "image_prompt" not in result:
+        raise RuntimeError(f"Gemini output missing required fields: {result}")
+    
+    result["_category"] = classify_news_category(entry)
+    return result
+
+
+def select_hashtags(entry: dict, character: dict) -> list:
+    hashtags_config = character["hashtags"]
+    tags = list(hashtags_config["always"])
+    
+    matched_lower = [kw.lower() for kw in entry.get("matched_keywords", [])]
+    text = f"{entry['title']} {entry['summary']}".lower()
+    
+    if any(x in text for x in ["ai", "artificial intelligence", "machine learning", "llm"]):
+        tags.extend(hashtags_config["conditional"]["ai"][:1])
+    if any(x in matched_lower for x in ["guidance", "guideline", "fda approval", "ema approval", "ich"]):
+        tags.extend(hashtags_config["conditional"]["regulatory"][:1])
+    if "signal" in text:
+        tags.extend(hashtags_config["conditional"]["signal"][:1])
+    if "icsr" in text:
+        tags.extend(hashtags_config["conditional"]["icsr"][:1])
+    if "pmda" in entry["source_name"].lower() or "pmda" in text:
+        tags.extend(hashtags_config["conditional"]["pmda"][:1])
+    
+    seen = set()
+    unique_tags = []
+    for t in tags:
+        if t not in seen:
+            seen.add(t)
+            unique_tags.append(t)
+        if len(unique_tags) >= 4:
+            break
+    
+    unique_tags.append(character["ai_disclosure"])
+    return unique_tags
+
+
+def compose_post(entry: dict, gen: dict, character: dict) -> str:
+    """
+    親ポストの本文を組み立て(画像とリプライURLは別途扱う)
+    優先順位: summary > hashtags
+    """
+    tags = select_hashtags(entry, character)
+    hashtags_str = " ".join(tags)
+    summary = gen["summary"]
+    max_total = character.get("max_chars", 278)
+    
+    full_post = f"{summary}\n\n{hashtags_str}"
+    if len(full_post) <= max_total:
+        return full_post
+    
+    minimal_tags = " ".join([
+        character["hashtags"]["always"][0],
+        character["hashtags"]["always"][1],
+        character["ai_disclosure"]
+    ])
+    minimal_post = f"{summary}\n\n{minimal_tags}"
+    if len(minimal_post) <= max_total:
+        return minimal_post
+    
+    overhead = len(f"\n\n{minimal_tags}")
+    allowed_summary = max_total - overhead
+    if allowed_summary > 1:
+        summary = summary[:allowed_summary - 1] + "…"
+    return f"{summary}\n\n{minimal_tags}"
+
+
+def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") -> str:
+    """
+    Gemini 2.5 Flash Image (Nano Banana) で画像生成 (新SDK使用)
+    成功時: 保存したファイルパスを返す
+    失敗時: None を返す
+    """
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("[image] GEMINI_API_KEY not set, skipping image generation")
+        return None
+    
+    try:
+        from google import genai as new_genai
+        from google.genai import types
+        
+        client = new_genai.Client(api_key=api_key)
+        
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-image",
+            contents=image_prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio="16:9",
+                ),
+            ),
+        )
+        
+        for part in response.parts:
+            if part.inline_data and part.inline_data.data:
+                image_bytes = part.inline_data.data
+                with open(output_path, "wb") as f:
+                    f.write(image_bytes)
+                print(f"[image] Saved to {output_path} ({len(image_bytes)} bytes)")
+                return output_path
+        
+        print("[image] No image data in response")
+        return None
+    
+    except Exception as e:
+        print(f"[image] Generation failed: {e}")
+        return None
