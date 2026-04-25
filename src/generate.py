@@ -209,3 +209,44 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
     if allowed_summary > 1:
         summary = summary[:allowed_summary - 1] + "…"
     return f"{summary}\n\n{minimal_tags}"
+
+
+def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") -> str:
+    """
+    Gemini 2.5 Flash Image (Nano Banana) で画像生成
+    成功時: 保存したファイルパスを返す
+    失敗時: None を返す(呼び出し元でテキストのみ投稿にフォールバック)
+    """
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("[image] GEMINI_API_KEY not set, skipping image generation")
+        return None
+    
+    try:
+        genai.configure(api_key=api_key)
+        
+        model = genai.GenerativeModel("gemini-2.5-flash-image")
+        
+        response = model.generate_content(
+            image_prompt,
+            generation_config={
+                "response_modalities": ["IMAGE"],
+            },
+        )
+        
+        # レスポンスから画像バイナリを抽出
+        for candidate in response.candidates:
+            for part in candidate.content.parts:
+                if hasattr(part, "inline_data") and part.inline_data:
+                    image_bytes = part.inline_data.data
+                    with open(output_path, "wb") as f:
+                        f.write(image_bytes)
+                    print(f"[image] Saved to {output_path} ({len(image_bytes)} bytes)")
+                    return output_path
+        
+        print("[image] No image data in response")
+        return None
+    
+    except Exception as e:
+        print(f"[image] Generation failed: {e}")
+        return None
