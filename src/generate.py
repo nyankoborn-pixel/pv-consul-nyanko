@@ -43,122 +43,115 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: ルパン三世風アニメ(明るく親しみやすいトーン版)
-    Monkey Punch / TMS Entertainment 系のレトロアニメ調
-    照明は明るく、女性キャラは微笑みや穏やかな表情を持つ
+    画像スタイル: ルパン三世風アニメ + 峰不二子レベルの妖艶演出
+    Monkey Punch / TMS Entertainment 1970s-90s 系
+    ボディコン衣装、ローアングル、ネオン背景、動きのあるポーズで存在感最大化
     """
     common_style = (
         "Style: Classic Japanese anime illustration inspired by Lupin III "
         "(Monkey Punch / TMS Entertainment, 1970s-1990s era). Hand-drawn "
         "cel animation aesthetic with bold black ink lines and confident "
-        "brushstrokes. Flat color shading. BRIGHT and warm color palette: "
-        "sunny yellows, warm oranges, fresh blues, mustard gold, soft "
-        "pastels with vibrant accent colors. Cheerful, optimistic mood. "
-        "Cel-shaded animation aesthetic, NOT photorealistic, NOT modern "
-        "digital painting, NOT 3D rendering."
+        "brushstrokes. Flat color shading with dramatic cel-style "
+        "highlights and shadows. Saturated cinematic color palette: "
+        "deep blacks, vivid magenta and hot pink neons, electric blues, "
+        "crimson red, metallic gold accents, and rich purples. The "
+        "atmosphere should feel like a key still from a stylish anime "
+        "thriller — sleek, sexy, charged with adrenaline. Cel-shaded "
+        "animation aesthetic, NOT photorealistic, NOT modern digital "
+        "painting, NOT 3D rendering."
     )
     
-    lighting_directive = (
-        "LIGHTING: BRIGHT and CHEERFUL — soft daylight from large windows, "
-        "warm sunny illumination, or bright clean indoor lighting. "
-        "Even, well-lit scene with soft shadows. NEVER film noir, NEVER "
-        "dramatic chiaroscuro, NEVER dark moody atmosphere, NEVER night "
-        "scenes. The mood should feel optimistic and inviting."
+    composition_directive = (
+        "MANDATORY COMPOSITION (absolute, never compromise):\n"
+        "1. CAMERA ANGLE: Extreme LOW ANGLE shot from below the subject's "
+        "hips, looking up at her dramatically.\n"
+        "2. FRAMING: FULL BODY shot showing her from head to high-heeled "
+        "feet. Subject occupies 50-70% of vertical canvas. Heels and "
+        "long legs MUST be visible.\n"
+        "3. POSE: Dynamic motion — she is mid-stride walking forward, "
+        "turning with attitude, OR in a sultry mid-action pose with "
+        "strong S-curve body line. Hair swept by movement. Hip "
+        "dramatically out to one side. NEVER static, NEVER both feet "
+        "together, NEVER simply standing.\n"
+        "4. LIGHTING: STRONG backlight from neon sources behind her — "
+        "vivid magenta, hot pink, electric blue, or crimson neon. "
+        "Backlight brighter than fill light, creating intense rim light "
+        "on her hair, shoulders, and silhouette. Neon glow spills onto "
+        "her cheekbones and skin in colored highlights."
     )
     
     figure_directive = (
-        "MANDATORY: Include an original anime-style female character as the "
-        "focal point, occupying 40-60% of the canvas. The character must be "
-        "ORIGINAL (not Lupin, Jigen, Goemon, Fujiko, Zenigata, or any "
-        "copyrighted character). Show her face clearly with a WARM, "
-        "FRIENDLY EXPRESSION — a confident smile, a gentle laugh, a "
-        "playful smirk, or a kind welcoming look. NEVER serious frown, "
-        "NEVER cold expression, NEVER dark scowl. She should feel "
-        "approachable and intelligent. Use the classic anime face style: "
-        "expressive bright eyes, defined features, soft natural smile. "
-        "Clothing matches the news context (smart casual blouse, "
-        "professional but cheerful attire, retro-modern fashion) but "
-        "NEVER dark business suit alone — add color, accent scarves, "
-        "warm tones. Pose: dynamic and welcoming — gesturing, presenting, "
-        "examining with curiosity, mid-action with positive energy."
+        "MANDATORY SUBJECT: An ORIGINAL anime-style mature woman as the "
+        "focal point. Confident, mysterious, captivating presence — like "
+        "a sophisticated international agent or femme fatale. Sharp "
+        "intelligent eyes with a knowing, slightly seductive gaze. "
+        "Striking adult features with elegant cheekbones and full lips. "
+        "Long flowing hair caught in motion or wind. ORIGINAL CHARACTER "
+        "ONLY — not Fujiko, Lupin, Jigen, Goemon, Zenigata, or any "
+        "copyrighted character.\n"
+        "EXPRESSION: Confident smirk, knowing smile, intense focus, "
+        "OR mysterious half-smile. NEVER serious frown, NEVER blank "
+        "expression, NEVER child-like big eyes.\n"
+        "ADULT PROPORTIONS: Tall, mature adult figure — clearly an adult "
+        "professional in her late 20s to 30s. NOT chibi, NOT teen, NOT "
+        "kawaii proportions."
     )
     
-    background_directive = (
-        "BACKGROUND: Fully painted in cel-animation style, never empty. "
-        "BRIGHT and welcoming environment — sunny office with large "
-        "windows showing blue sky, light-filled research lab with white "
-        "walls and warm wood accents, cheerful boardroom with city "
-        "skyline at golden hour, or vibrant urban scene during the day. "
-        "Soft natural lighting fills the space. The background should "
-        "feel optimistic and energetic, with specific objects relevant "
-        "to the news theme."
+    wardrobe_directive = (
+        "MANDATORY WARDROBE (this is critical for impact):\n"
+        "Glamorous bold attire — choose ONE:\n"
+        "- A glossy black or red form-fitting evening dress with high "
+        "thigh slit exposing one leg, plunging neckline, and statement "
+        "shoulder cut\n"
+        "- A tight bodycon dress with cutout details at the waist or "
+        "side, glossy fabric finish\n"
+        "- A satin slip dress with thin straps and asymmetric hem\n"
+        "- A sleek catsuit or fitted leather/vinyl outfit with heroic "
+        "spy aesthetic\n"
+        "Statement high heels with ankle straps, heels visible.\n"
+        "Bold accessories: large drop earrings, fine necklace catching "
+        "the neon light, slim leather gloves optional.\n"
+        "Hair: long, flowing dramatically in the wind or motion, with "
+        "rim light highlights catching the neon.\n"
+        "NEVER business suits, NEVER trench coats, NEVER lab coats, "
+        "NEVER conservative office attire, NEVER covered modest "
+        "clothing. This is high-impact glamour wardrobe."
+    )
+    
+    setting_directive = (
+        "SETTING: Nighttime urban environment — neon-lit Tokyo or Shibuya "
+        "street with vertical neon signs, a rain-slicked city corner with "
+        "glowing puddle reflections, a high-floor balcony overlooking a "
+        "neon city, OR a luxurious nightclub-lounge interior with "
+        "dramatic accent lighting. Wet glossy reflections on the ground "
+        "capturing the colored neon. Atmospheric haze for cinematic depth. "
+        "Neon signs in the background (no readable text, just neon shapes "
+        "and colors)."
     )
     
     hard_forbidden = (
-        "DO NOT use: "
+        "ABSOLUTE PROHIBITIONS: "
         "- Modern anime style (Demon Slayer, Jujutsu Kaisen, Naruto-era look) "
-        "- Soft kawaii/moe style or chibi proportions "
+        "- Soft kawaii/moe style or chibi proportions, child-like big eyes "
         "- Photorealistic rendering or 3D CGI "
         "- Western comic book painted style (Alex Ross, Marvel) "
         "- Minimalist line art or flat vector illustration "
         "- Any copyrighted Lupin III characters (Lupin, Jigen, Goemon, "
-        "  Fujiko, Zenigata, Inspector Zenigata) "
-        "- Dark, moody, noir, or dramatic chiaroscuro lighting "
-        "- Night scenes, dim interiors, shadowy atmospheres "
-        "- Serious frowning expression, cold or unfriendly faces "
-        "- All-dark color schemes (deep navy + black dominated) "
-        "- Generic stock medical clichés (pills + warning sign, stethoscope, "
-        "  caduceus, DNA helix as main subject)"
+        "Fujiko, Zenigata, Inspector Zenigata) "
+        "- Conservative office attire, business suits, trench coats, "
+        "lab coats, covered modest clothing "
+        "- Static stationary poses with both feet together "
+        "- Daylight settings, bright sunny scenes, daytime offices "
+        "- Bust-up framing, headshot framing, waist-up only "
+        "- Sitting at desks, working at computers "
+        "- Multiple people in frame "
+        "- Generic medical clichés (pills, stethoscope, caduceus, DNA) "
+        "- Text, letters, numbers, logos, readable signage in image "
+        "- Full nudity, transparent clothing, exposed nipples or genitals "
+        "- Subjects appearing under 25 years old"
     )
     
-    category_scenes = {
-        "regulatory": (
-            "Scene direction: An original cheerful character as a "
-            "regulatory professional in a bright stately government office "
-            "with tall sunny windows, white marble floors with warm light "
-            "reflections. She is presenting a document with a confident "
-            "warm smile, or gesturing toward an architectural feature. "
-            "Daylight floods the scene. Include specific objects: "
-            "documents, official seals, pens, classical architectural "
-            "details rendered in warm tones."
-        ),
-        "ai_tech": (
-            "Scene direction: An original character as a scientist or "
-            "engineer in a bright modern lab with white walls, large "
-            "windows, and warm wood accents. She is interacting with "
-            "retro-futuristic AI technology — a vintage-anime-style "
-            "holographic interface or glowing screens — with a curious "
-            "smile and engaged expression. Daylight streams in mixing "
-            "with the technology's glow. Include specific objects from "
-            "the news theme."
-        ),
-        "market_business": (
-            "Scene direction: An original character as a corporate "
-            "executive in a bright sunny boardroom with floor-to-ceiling "
-            "windows showing a daytime city skyline. She is presenting "
-            "with confidence and a warm smile, gesturing toward a "
-            "diagram or speaking energetically. Classic 70s-80s anime "
-            "aesthetic with wood paneling and bright natural light. "
-            "Include specific objects from the news theme."
-        ),
-        "china": (
-            "Scene direction: An original character of East Asian "
-            "appearance, as a researcher or executive, in a bright modern "
-            "Chinese pharmaceutical/research environment with subtle "
-            "traditional aesthetic touches. Daylight, warm tones, "
-            "cheerful expression. Avoid stereotypical imagery."
-        ),
-        "general": (
-            "Scene direction: An original pharmaceutical industry "
-            "character in a bright welcoming setting, with a warm smile "
-            "and confident pose representing the news theme. Cheerful "
-            "cel-animation background with daylight."
-        ),
-    }
-    
-    scene = category_scenes.get(category, category_scenes["general"])
-    
-    return f"{common_style} {lighting_directive} {figure_directive} {background_directive} {scene} {hard_forbidden}"
+    return f"{common_style}\n\n{composition_directive}\n\n{figure_directive}\n\n{wardrobe_directive}\n\n{setting_directive}\n\n{hard_forbidden}"
 
 
 def build_prompt(entry: dict, character: dict) -> str:
