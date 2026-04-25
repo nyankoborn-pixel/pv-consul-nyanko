@@ -43,88 +43,100 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: モダン・エディトリアル・コミック調
-    The Rundown AI 寄りの、迫力ある一枚絵を狙う
+    画像スタイル: Alex Ross 風アメコミ・1枚絵
+    Marvel/DC 系のヒーロー的・派手・劇画調・彩度高
     """
     common_style = (
-        "Style: Modern editorial illustration with comic book influence. "
-        "Vibrant, dramatic, cinematic lighting. Bold composition with a clear "
-        "focal subject taking up significant canvas space. Rich color palette "
-        "centered on deep navy blue (#0E1B2E) and warm gold (#C89D44), with "
-        "ONE additional bold accent color (electric blue, crimson red, or "
-        "emerald green) used dramatically. Strong shadows and highlights. "
-        "Stylized but expressive — think editorial covers of WIRED, "
-        "Bloomberg Businessweek, or Pop-Sci magazine. NOT minimalist, "
-        "NOT flat-vector. Painterly digital illustration with depth."
+        "Style: Painterly American comic book illustration in the style of "
+        "Alex Ross. Hyper-realistic painted comic art with dramatic chiaroscuro "
+        "lighting. Vibrant saturated colors. Heroic, cinematic composition with "
+        "strong perspective and depth. The image should feel like a key panel "
+        "from a major Marvel or DC comic book — epic, consequential, charged "
+        "with emotion. Rich detail in clothing, environment, and lighting. "
+        "Color palette: deep navy blue and warm gold as base, with bold accent "
+        "colors (crimson, electric blue, emerald) used dramatically. "
+        "Painterly brushwork visible, NOT flat vector or thin line art."
     )
     
     figure_directive = (
-        "INCLUDE a stylized human figure as the focal point. The figure should "
-        "have a clear pose and expression conveying the news theme — confident, "
-        "concerned, contemplative, or determined. Show the face, but stylize "
-        "it (anime/comic/painterly style) so it doesn't look like a specific "
-        "real person. The figure should occupy 30-50% of the canvas. They "
-        "should be ACTIVELY DOING something (holding, examining, presenting, "
-        "deciding) — not just standing."
+        "MANDATORY: Include a clearly rendered human figure as the heroic "
+        "focal point, occupying 40-60% of the canvas. Show their FACE clearly "
+        "with a strong, dramatic expression — determined, contemplative, "
+        "alarmed, triumphant, or commanding. Stylized in painted comic style "
+        "(NOT photorealistic, NOT anime). The figure should be in a strong, "
+        "cinematic pose: gesturing, holding something significant, mid-action, "
+        "or in a moment of decision. Their costume/clothing should match the "
+        "context (lab coat, business suit, regulator uniform, etc.) but "
+        "stylized heroically."
     )
     
     background_directive = (
-        "BACKGROUND must be richly described, not empty. Include a clear "
-        "setting that adds context: institutional architecture, scientific "
-        "environment, abstract symbolic space, or dramatic atmospheric scene. "
-        "Use depth, shadows, and atmospheric lighting. The background should "
-        "amplify the news theme."
+        "BACKGROUND: Fully painted, never empty. Include richly detailed "
+        "context — institutional architecture, scientific environment, "
+        "boardroom, urban skyline, or symbolic setting. Use dramatic light "
+        "sources (sunbeams, monitor glow, spotlights) creating strong shadows. "
+        "Background can include supporting objects directly relevant to the "
+        "news theme."
     )
     
     hard_forbidden = (
         "DO NOT use: "
         "- Minimalist line art or simple geometric shapes "
-        "- Empty white/cream backgrounds with negative space "
+        "- Empty white backgrounds with negative space "
         "- Flat 2D vector illustration aesthetics "
-        "- Silhouette-only figures without faces or expressions "
-        "- Generic medical pills, capsules, molecular structures "
-        "- Stethoscope, lab coat, white-coated doctor clichés "
-        "- Caduceus, red cross, hospital cross "
-        "- Round symmetrical centered compositions "
-        "- Abstract data visualizations as the main subject"
+        "- Silhouette figures without faces "
+        "- Anime or manga style "
+        "- Photorealistic 3D rendering "
+        "- Generic stock medical clichés (pills + warning, stethoscope, "
+        "  caduceus, DNA helix as main subject) "
+        "- Cute or chibi character styles"
     )
     
     category_scenes = {
         "regulatory": (
-            "Scene: A determined regulator/official figure in a dramatic "
-            "institutional setting — perhaps holding an oversized seal or "
-            "document, gesturing toward a blueprint, or standing before "
-            "monumental architectural columns. Strong sense of authority and "
-            "consequence. Cinematic lighting from a window or overhead source. "
-            "The composition should feel like a key scene in a political drama."
+            "Scene direction: A determined regulator/official figure as the "
+            "hero — perhaps holding aloft an oversized seal or document, "
+            "standing before towering institutional pillars, or signing a "
+            "consequential decree. Lighting from above creating heroic "
+            "shadows. The composition should feel like the moment a major "
+            "policy is enacted. Include specific objects from the news theme "
+            "in the scene (documents, pens, official seals, building "
+            "architecture)."
         ),
         "ai_tech": (
-            "Scene: A scientist or engineer figure interacting with a "
-            "spectacular AI manifestation — a glowing geometric construct, "
-            "data tendrils, or a holographic interface. The figure should look "
-            "fascinated, focused, or slightly awed. Dark dramatic environment "
-            "with the AI element as the bright focal glow. Cinematic, slightly "
-            "futuristic but grounded."
+            "Scene direction: A scientist or engineer figure in heroic pose, "
+            "facing or commanding a spectacular AI manifestation — a glowing "
+            "holographic interface, a massive data construct, or a powerful "
+            "neural network visualization. Their face shows fascination or "
+            "determination. The AI element glows dramatically with electric "
+            "blue or gold light, illuminating the scene. Include specific "
+            "objects from the news theme (lab equipment, screens, data "
+            "displays, pharmaceutical bottles in background)."
         ),
         "market_business": (
-            "Scene: An executive figure in a moment of strategic action — "
-            "moving large physical pieces (chess-like, or abstract architectural "
-            "blocks), studying a complex map, or pointing decisively. Rich "
-            "boardroom-like or abstract corporate landscape. The composition "
-            "should convey high-stakes consequence."
+            "Scene direction: An executive figure in a dramatic boardroom or "
+            "corporate setting, in a moment of strategic command — perhaps "
+            "moving a large symbolic object, gesturing toward a complex "
+            "strategy display, or in confrontation with another figure. "
+            "Cinematic lighting through large windows. The composition "
+            "conveys high-stakes business drama. Include specific objects "
+            "from the news theme."
         ),
         "china": (
-            "Scene: A figure with East Asian features (stylized, respectful, "
-            "not stereotypical) in a setting blending traditional Chinese "
-            "architectural elements with modern pharmaceutical/technological "
-            "aesthetics. Avoid cliché dragons, lanterns, or pandas. Use "
-            "ink-wash inspired textures combined with sharp modern composition."
+            "Scene direction: A Chinese researcher or executive figure as "
+            "the hero, in a setting blending modern Chinese pharmaceutical/"
+            "research architecture with traditional aesthetic elements "
+            "(stylized respectfully). Strong dramatic lighting. The figure "
+            "should look forward-thinking, determined. Avoid stereotypical "
+            "imagery (no dragons, lanterns, pandas). Use modern Chinese "
+            "urban or institutional settings."
         ),
         "general": (
-            "Scene: A pharmaceutical industry figure (researcher, executive, "
-            "regulator) in a dramatic moment of action representing the news "
-            "theme. Strong character pose, clear emotion, rich atmospheric "
-            "background."
+            "Scene direction: A pharmaceutical industry hero figure "
+            "(researcher, executive, regulator) in a dramatic moment of "
+            "action representing the news theme. Strong heroic pose, clear "
+            "powerful emotion, fully rendered atmospheric background. "
+            "Include specific objects from the news theme."
         ),
     }
     
