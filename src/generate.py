@@ -66,11 +66,7 @@ Her expression is calm, confident, and poised.
 The pose should feel like a fashion editorial walking shot, not a static studio pose.
 
 WARDROBE:
-A sleek, modern, well-fitted high-fashion outfit.
-Preferred styling: a black satin evening dress with a tasteful slit,
-or a sophisticated fitted dress in deep red, black, metallic gold, or rich jewel tones.
-The outfit should be stylish, polished, and editorial.
-Avoid explicit sexual styling.
+Japanese high school girls' sailor uniforms have very short skirts.
 
 CAMERA:
 Aspect ratio: 16:9 landscape.
@@ -95,7 +91,6 @@ Required Specifications:
 - fetish pose
 - Drenched in sweat
 - M-shaped open leg pose
-- A face like the Japanese celebrity Dan Mitsu
 
 ABSOLUTE PROHIBITIONS:
 - No anime, manga, cartoon, comic, or illustration style
