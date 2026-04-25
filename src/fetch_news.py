@@ -1,7 +1,7 @@
 """
 fetch_news.py - RSS feedからPVニュースを収集
 - User-Agent付きリクエストでGoogle News RSSのbotブロックを回避
-- Google NewsリダイレクトURLを実記事URLに解決(X OGPカード表示のため)
+- googlenewsdecoderでGoogle News URLを実記事URLに解決(X OGPカード表示のため)
 """
 import feedparser
 import yaml
@@ -9,6 +9,7 @@ import time
 import requests
 from datetime import datetime, timezone, timedelta
 from dateutil import parser as date_parser
+from googlenewsdecoder import gnewsdecoder
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
@@ -28,24 +29,29 @@ def parse_entry_date(entry) -> datetime:
     return datetime.now(timezone.utc)
 
 
-def resolve_google_news_url(google_url: str, timeout: int = 10) -> str:
+def resolve_google_news_url(google_url: str) -> str:
     """
     Google News RSSのリダイレクトURLを実記事URLに解決。
     X側でOGPカード(画像/動画/タイトル)を自動表示させるために必要。
-    Google News URL以外、または解決失敗時は元URLをそのまま返す。
+    
+    googlenewsdecoder ライブラリを使用。Google News の batchexecute API を
+    叩いて Base64 エンコードされた URL をデコードする。
+    
+    解決失敗時は元URLをそのまま返す(投稿は継続される)。
+    Google News URL以外はそのまま返す。
     """
     if not google_url or "news.google.com" not in google_url:
         return google_url
     try:
-        resp = requests.head(
-            google_url,
-            headers={"User-Agent": UA},
-            allow_redirects=True,
-            timeout=timeout,
-        )
-        return resp.url
+        # interval=1 で Google API の rate limit (HTTP 429) を回避
+        result = gnewsdecoder(google_url, interval=1)
+        if result.get("status") and result.get("decoded_url"):
+            return result["decoded_url"]
+        else:
+            print(f"  [resolve] decode failed: {result.get('message', 'unknown')}")
+            return google_url
     except Exception as e:
-        print(f"  [resolve] failed: {e}")
+        print(f"  [resolve] exception: {e}")
         return google_url
 
 
