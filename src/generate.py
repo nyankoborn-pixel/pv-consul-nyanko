@@ -224,7 +224,7 @@ def generate_post_content(entry: dict, character: dict) -> dict:
         generation_config={
             "temperature": 0.85,
             "top_p": 0.95,
-            "max_output_tokens": 2000,
+            "max_output_tokens": 4000,
             "response_mime_type": "application/json",
         },
     )
