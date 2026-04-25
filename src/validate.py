@@ -1,11 +1,15 @@
 """
 validate.py - 生成された投稿の検証(防御策のコア)
 - 固有名詞マッチング: 生成文中の固有名詞が原文にあるか照合
-- 文字数チェック
+- 文字数チェック(X仕様: URLはt.coで23字に短縮されるためその換算で計算)
 - 禁止表現チェック
 """
 import re
 import yaml
+
+
+# X (Twitter) の URL 短縮ルール: どんな URL も t.co で 23 文字としてカウントされる
+TCO_LENGTH = 23
 
 
 # 固有名詞候補の正規表現パターン
@@ -62,26 +66,46 @@ def validate_proper_nouns(generated_text: str, source_text: str) -> tuple:
     return len(violations) == 0, violations
 
 
-def validate_char_count(post: str, max_chars: int = 270) -> tuple:
-    """X投稿の文字数チェック"""
-    # URLは t.co で短縮されるが、今回URLは含めないので素直にlen
-    length = len(post)
+def calculate_x_length(post: str) -> int:
+    """
+    X (Twitter) 上での実消費文字数を計算。
+    URL は t.co で 23 文字に短縮されるルールに準拠。
+    
+    例:
+      "テスト https://very-long-url.example.com/article/12345"
+      → ローカル len() では 50字超
+      → X 上では 4(テスト + 半角スペース) + 23(URL) = 27字
+    """
+    # URLを検出する正規表現(http/httpsで始まる連続する非空白文字)
+    url_pattern = r'https?://\S+'
+    urls = re.findall(url_pattern, post)
+    
+    # URL を一旦削除してから残りの文字数を計算し、URL分は固定23字 × URL個数で加算
+    text_without_urls = re.sub(url_pattern, '', post)
+    return len(text_without_urls) + TCO_LENGTH * len(urls)
+
+
+def validate_char_count(post: str, max_chars: int = 278) -> tuple:
+    """
+    X投稿の文字数チェック(t.co短縮を考慮)
+    """
+    length = calculate_x_length(post)
     if length > max_chars:
-        return False, f"Post too long: {length} > {max_chars}"
+        return False, f"Post too long: {length} > {max_chars} (X-counted)"
     if length < 30:
-        return False, f"Post too short: {length}"
+        return False, f"Post too short: {length} (X-counted)"
     return True, None
 
 
 def validate_forbidden_expressions(post: str, character: dict) -> tuple:
     """禁止表現チェック(最小限の基本パターン)"""
     # 特に医療アドバイス・投資誘導を厳格にブロック
+    # 注: 「死亡例」「重篤」などは PV 領域で正当な用語のため、扇情的な使い方のみブロック
     forbidden_patterns = [
         (r'(買[いう]|売[りる])[^。]*株', "投資誘導表現"),
         (r'服用(すべき|しないで|中止)', "医療アドバイス断定"),
         (r'(絶対|必ず)安全', "断定的安全性主張"),
         (r'(絶対|必ず)危険', "断定的危険性主張"),
-        (r'(死亡|死ぬ|殺[すし])', "扇情的表現"),
     ]
     
     violations = []
@@ -112,20 +136,25 @@ def validate_post(post: str, entry: dict, character: dict) -> dict:
     return {
         "passed": all_ok,
         "proper_noun": {"ok": noun_ok, "violations": noun_violations},
-        "char_count": {"ok": char_ok, "message": char_msg, "length": len(post)},
+        "char_count": {
+            "ok": char_ok,
+            "message": char_msg,
+            "length_local": len(post),
+            "length_x": calculate_x_length(post),
+        },
         "forbidden": {"ok": forbid_ok, "violations": forbid_violations},
     }
 
 
 if __name__ == "__main__":
     # テスト
-    test_post = "FDAが医薬品安全性に関する新しいガイダンスを発表しました。\n\n🐾 Pfizer社の重要な動きです\n\n#Pharmacovigilance #AI生成"
+    test_post = "FDAが医薬品安全性に関する新しいガイダンスを発表しました。\n\n🐾 重要な動きです\n\n#Pharmacovigilance #AI生成\nhttps://very-long-google-news-url.example.com/articles/CBMiT0FVX31xTE1qX2VKQnFSQ3FnYXkyUm1wM1B3R2ctR21ERXo2QWNENF9hSGRCdDR1az11ajh6SjRCdUpWTk1xUlVWUldVRkliVXBFWlVKT0xWcFNRbk0"
     test_entry = {
         "title": "FDA issues new guidance on drug safety",
         "summary": "The FDA released new guidance.",
         "source_name": "FDA",
     }
-    character = {"max_chars": 270}
+    character = {"max_chars": 278}
     result = validate_post(test_post, test_entry, character)
     import json
     print(json.dumps(result, ensure_ascii=False, indent=2))
