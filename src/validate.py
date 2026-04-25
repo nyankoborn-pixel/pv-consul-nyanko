@@ -1,8 +1,9 @@
 """
 validate.py - 生成された投稿の検証
-- 文字数チェック(X仕様: URLはt.coで23字に短縮されるためその換算で計算)
-- 禁止表現チェック(医療アドバイス・投資誘導など炎上リスク表現のブロック)
-- 固有名詞マッチングは警告のみ(新方針: コンサル目線の解釈・推測を許容)
+- 文字数チェック(X仕様: URLはt.coで23字に短縮)
+- 禁止表現チェック(医療アドバイス・投資誘導など)
+- 略語・年号の原文照合(ハルシネーション防止)
+- 一般単語、業界解釈、推測表現は許容
 """
 import re
 
@@ -11,34 +12,63 @@ import re
 TCO_LENGTH = 23
 
 
-# 固有名詞候補の正規表現パターン(警告ログ用、ブロックには使わない)
-PROPER_NOUN_PATTERNS = [
-    r'\b[A-Z][a-zA-Z0-9\-]{2,}(?:\s+[A-Z][a-zA-Z0-9\-]+)*\b',
-    r'\b[A-Z]{2,}(?:\-\d+)?\b',
-    r'\d+(?:\.\d+)?\s*(?:mg|ml|mL|%|年|月|日|件)',
-    r'\b(?:19|20)\d{2}\b',
-]
+# ホワイトリスト(原文になくても使ってよい一般PV用語・キャラ用語)
+WHITELIST = {
+    # 一般的なPV用語
+    "PV", "AI", "ICH", "GxP", "GVP", "GCP", "GLP", "GMP",
+    "FDA", "EMA", "PMDA", "MHRA", "WHO", "CIOMS", "NMPA", "CDE",
+    "ICSR", "PSUR", "PBRER", "DSUR", "RMP",
+    "DX", "IT", "API",
+    # キャラ関連
+    "コンサルにゃんこ",
+    # ハッシュタグ用英字(generate.pyで付与するため)
+    "Pharmacovigilance", "DrugSafety", "PharmaAI", "AIinPharma",
+    "RegulatoryAffairs", "SignalDetection",
+}
 
 
-def extract_proper_nouns(text: str) -> set:
-    nouns = set()
-    for pattern in PROPER_NOUN_PATTERNS:
-        for match in re.finditer(pattern, text):
-            nouns.add(match.group(0).strip())
-    return nouns
-
-
-def detect_proper_noun_mismatches(generated_text: str, source_text: str) -> list:
+def extract_acronyms(text: str) -> set:
     """
-    生成文中の固有名詞のうち、原文に存在しないものを返す(警告用、ブロックしない)
+    2-5文字の大文字略語を抽出(企業名・規制名・製品名の検出)
     """
-    gen_nouns = extract_proper_nouns(generated_text)
+    pattern = r'\b[A-Z]{2,5}(?:\-?\d{1,2})?\b'
+    return set(re.findall(pattern, text))
+
+
+def extract_years(text: str) -> set:
+    """年号(19xx, 20xx)を抽出"""
+    pattern = r'\b(?:19|20)\d{2}\b'
+    return set(re.findall(pattern, text))
+
+
+def detect_acronym_violations(generated_text: str, source_text: str) -> list:
+    """
+    生成文中の略語のうち、原文・ホワイトリストのいずれにも含まれないものを返す。
+    これは厳格な violation(リジェクト対象)。
+    """
+    gen_acronyms = extract_acronyms(generated_text)
     source_lower = source_text.lower()
-    mismatches = []
-    for noun in gen_nouns:
-        if noun.lower() not in source_lower:
-            mismatches.append(noun)
-    return mismatches
+    violations = []
+    for acro in gen_acronyms:
+        if acro in WHITELIST:
+            continue
+        if acro.lower() not in source_lower:
+            violations.append(acro)
+    return violations
+
+
+def detect_year_violations(generated_text: str, source_text: str) -> list:
+    """
+    生成文中の年号で、原文にないものを返す。
+    これは厳格な violation(リジェクト対象)。
+    """
+    gen_years = extract_years(generated_text)
+    source_years = extract_years(source_text)
+    violations = []
+    for year in gen_years:
+        if year not in source_years:
+            violations.append(year)
+    return violations
 
 
 def calculate_x_length(post: str) -> int:
@@ -59,12 +89,7 @@ def validate_char_count(post: str, max_chars: int = 278) -> tuple:
 
 
 def validate_forbidden_expressions(post: str, character: dict) -> tuple:
-    """
-    禁止表現チェック: 炎上リスクの高い表現のみブロック
-    - 医療アドバイス断定(服用すべき等)
-    - 投資誘導(株を買う等)
-    - 絶対安全/絶対危険の断定
-    """
+    """禁止表現チェック: 炎上リスク表現のみブロック"""
     forbidden_patterns = [
         (r'(買[いう]|売[りる])[^。]*株', "投資誘導表現"),
         (r'服用(すべき|しないで|中止)', "医療アドバイス断定"),
@@ -82,29 +107,32 @@ def validate_forbidden_expressions(post: str, character: dict) -> tuple:
 
 def validate_post(post: str, entry: dict, character: dict) -> dict:
     """
-    全検証を実行し、結果を返す
+    全検証を実行
     - 文字数: 必須(超過したらリジェクト)
     - 禁止表現: 必須(該当したらリジェクト)
-    - 固有名詞: 警告のみ(リジェクトしない)
+    - 略語の原文照合: 必須(原文にない略語はハルシネーションリスク)
+    - 年号の原文照合: 必須(原文にない年号は捏造の可能性)
     """
     source_text = f"{entry['title']} {entry['summary']} {entry['source_name']}"
     body = re.split(r'\n\n#', post)[0]
     
-    # 固有名詞は警告のみ(passed の判定には影響しない)
-    noun_mismatches = detect_proper_noun_mismatches(body, source_text)
-    
+    # 厳格チェック
+    acronym_violations = detect_acronym_violations(body, source_text)
+    year_violations = detect_year_violations(body, source_text)
     char_ok, char_msg = validate_char_count(post, character["max_chars"])
     forbid_ok, forbid_violations = validate_forbidden_expressions(post, character)
     
-    # passed 判定: 文字数 + 禁止表現のみが必須
-    all_ok = char_ok and forbid_ok
+    # passed 判定
+    proper_noun_ok = (len(acronym_violations) == 0 and len(year_violations) == 0)
+    all_ok = char_ok and forbid_ok and proper_noun_ok
     
     return {
         "passed": all_ok,
         "proper_noun": {
-            "ok": True,  # 警告のみのため常に True
-            "mismatches_warning": noun_mismatches,
-            "violations": [],  # 後方互換のため空リストを残す
+            "ok": proper_noun_ok,
+            "violations": acronym_violations + year_violations,
+            "acronym_violations": acronym_violations,
+            "year_violations": year_violations,
         },
         "char_count": {
             "ok": char_ok,
@@ -117,13 +145,26 @@ def validate_post(post: str, entry: dict, character: dict) -> dict:
 
 
 if __name__ == "__main__":
-    test_post = "アスピリンは100年以上の歴史を持つが、副作用情報は今も更新されている。\n\n#Pharmacovigilance #DrugSafety #AI生成"
-    test_entry = {
+    # テスト1: 健全な投稿
+    test_post1 = "アスピリンは長い歴史を持つが、副作用情報は今も更新されている。\n\n#Pharmacovigilance #AI生成"
+    test_entry1 = {
         "title": "アスピリンの使用上の注意改訂",
         "summary": "アスピリンに副作用追加",
         "source_name": "厚労省",
     }
+    
+    # テスト2: ハルシネーション例(原文にPSURと書かれていないのに使う)
+    test_post2 = "韓国の物理研究がRMP/PSURの新潮流を作っている。\n\n#Pharmacovigilance #AI生成"
+    test_entry2 = {
+        "title": "韓国の2次元磁性研究",
+        "summary": "ソウル大学が物理学レビューを掲載",
+        "source_name": "ChosunBiz",
+    }
+    
     character = {"max_chars": 278}
-    result = validate_post(test_post, test_entry, character)
+    
     import json
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print("=== Test 1: 健全な投稿 ===")
+    print(json.dumps(validate_post(test_post1, test_entry1, character), ensure_ascii=False, indent=2))
+    print("\n=== Test 2: ハルシネーション例 ===")
+    print(json.dumps(validate_post(test_post2, test_entry2, character), ensure_ascii=False, indent=2))
