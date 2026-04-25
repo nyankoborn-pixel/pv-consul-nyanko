@@ -14,11 +14,11 @@ TCO_LENGTH = 23
 
 # ホワイトリスト(原文になくても使ってよい一般PV用語・キャラ用語)
 WHITELIST = {
-    # 一般的なPV用語
+    # 一般カテゴリ用語(原文になくても使ってよい)
     "PV", "AI", "ICH", "GxP", "GVP", "GCP", "GLP", "GMP",
-    "FDA", "EMA", "PMDA", "MHRA", "WHO", "CIOMS", "NMPA", "CDE",
-    "ICSR", "PSUR", "PBRER", "DSUR", "RMP",
     "DX", "IT", "API",
+    # 規制当局名(一般常識として使用可)
+    "FDA", "EMA", "PMDA", "MHRA", "WHO", "CIOMS", "NMPA", "CDE",
     # キャラ関連
     "コンサルにゃんこ",
     # ハッシュタグ用英字(generate.pyで付与するため)
