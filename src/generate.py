@@ -45,54 +45,65 @@ def get_image_style_for_category(category: str) -> str:
     """
     画像スタイル: 夜景 × 歩き × 低めアングル × 高級ファッション写真
     """
-    base_style = """
+base_style = """
 STYLE:
-Hyperrealistic cinematic fashion photography, ultra-detailed, high-end editorial look.
-Shot like a luxury magazine campaign or cinematic key visual.
-Shallow depth of field, realistic skin texture, natural hair movement, realistic fabric texture.
-NOT anime, NOT manga, NOT illustration, NOT 3D rendering, NOT comic art.
+Ultra-photorealistic cinematic studio photography.
+Looks like a real high-end editorial photograph shot with a full-frame cinema camera.
+Natural skin pores, subtle skin texture, realistic facial asymmetry, realistic hair strands,
+real fabric wrinkles, believable body proportions, realistic hands and fingers.
+No plastic skin, no doll-like face, no AI-glossy texture, no over-smoothed beauty filter.
+NOT anime, NOT manga, NOT illustration, NOT 3D render, NOT cosplay poster.
 
 SUBJECT:
-A single East Asian woman in her late 10s to early 20s.
-She has a confident, composed, fashion-forward presence.
-Her face is original and must not resemble any real celebrity, model, public figure, or fictional character.
-She should look mature, elegant, and charismatic.
-
-POSE:
-A seductive, sexy pose that would provoke men.
+A single East Asian woman, clearly 25 years old or older.
+She has an original face and must not resemble any real celebrity, model, public figure,
+anime character, game character, or fictional character.
+Her expression is calm, intelligent, confident, and professional.
 
 WARDROBE:
-A cute, authentic, and well-tailored high school uniform inspired by various global styles.
-Preferred styling: a classic Japanese sailor-style uniform, a stylish Korean-style uniform with a pleated skirt and fitted blazer, a traditional British school blazer with a tie, or a neat American prep school outfit.
-The outfit should be charming, neat, and highly detailed.
-Avoid explicit sexual styling, overly short skirts, or fetishized interpretations.
+A refined fashion outfit inspired by Japanese sailor-uniform design,
+reinterpreted as an adult editorial fashion look.
+Elegant, neat, tailored, modest, and non-explicit.
+No fetish styling, no overly short skirt, no exposed underwear, no schoolgirl sexualization.
+
+POSE:
+Confident editorial standing pose.
+Natural shoulder angle, relaxed hands, composed posture.
+Elegant and cinematic, not sexual, not provocative.
 
 CAMERA:
 Aspect ratio: 16:9 landscape.
-Camera positioned slightly below eye level, creating a powerful but natural perspective.
-Full body or three-quarter body framing.
-The subject should occupy 40-60% of the frame.
+Shot on an 85mm lens, full-frame camera, shallow depth of field.
+Three-quarter body framing.
+Camera slightly below eye level, cinematic perspective.
+Subject occupies 40-55% of the frame.
 
 LIGHTING:
-Urban night scene with city lights and soft backlighting.
-Gentle edge light around the silhouette.
-Subtle reflections on fabric under city lights.
-Cinematic bokeh in the background.
-Dramatic but tasteful contrast.
+Night laboratory and city-light environment.
+Soft key light on the face, cool blue rim light, subtle warm practical lights,
+realistic glass reflections, controlled contrast, cinematic bokeh.
+No harsh HDR, no oversaturated neon, no fake glow.
 
 BACKGROUND:
-Modern city street at night with tall buildings, glass facades, wet reflective pavement,
-blurred traffic lights, and atmospheric depth.
-No readable signs, no logos, no text.
+Modern pharmaceutical AI laboratory at night.
+Glass walls, wet city skyline reflections, realistic lab benches, beakers,
+sealed document folders, pharmaceutical packages with no readable text,
+holographic-style data panels with abstract unreadable marks only.
+No readable signs, no logos, no letters, no numbers.
 
-
-Required Specifications:
-- No subject under 20 years old
+REALISM REQUIREMENTS:
+Photorealistic original human face.
+Realistic eyes with natural catchlights.
+Correct anatomy, realistic hands, realistic clothing physics.
+Professional cinematic color grading.
+High detail, natural depth, believable lens blur.
 
 ABSOLUTE PROHIBITIONS:
-- No anime, manga, cartoon, comic, or illustration style
-- No logos, no readable text, no letters, no numbers
-- No multiple people
+No erotic pose, no fetish pose, no seductive framing.
+No nudity.
+No anime, manga, cartoon, comic, illustration, 3D rendering.
+No readable text, no letters, no numbers, no logos.
+No multiple people.
 """.strip()
 
     category_scenes = {
@@ -194,7 +205,7 @@ PVに関係ある場合(is_pv_related=true):
 {{
   "is_pv_related": true,
   "summary": "120-180字、フックのある日本語要約",
-  "image_prompt": "100-150 words、英語の画像プロンプト"
+  "image_prompt": "180-260 words、英語の画像プロンプト"
 }}
 
 【summary 設計指針(is_pv_related=true の時のみ)- 極めて重要】
