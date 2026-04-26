@@ -25,7 +25,7 @@ from post_x import post_to_x, post_reply
 
 
 POSTED_LOG = Path("logs/posted.jsonl")
-MAX_RETRIES = 5  # PV無関係スキップが増える可能性があるため拡大
+MAX_RETRIES = 15  # PV無関係スキップが増える可能性があるため拡大
 REPLY_DELAY_SEC = 5
 
 
@@ -64,8 +64,8 @@ def run(dry_run: bool = False) -> int:
         print("⚠ No scorable entries. Exiting.")
         return 1
     
-    print(f"\n=== Top 5 candidates ===")
-    for e in scored[:5]:
+    print(f"\n=== Top {MAX_RETRIES} candidates ===")
+    for e in scored[:MAX_RETRIES]:
         print(f"  [{e['score']:.1f}] [{e['source_name']}] {e['title'][:80]}")
     
     # 3. 上位候補で生成・検証
