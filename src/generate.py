@@ -53,7 +53,7 @@ Shallow depth of field, realistic skin texture, natural hair movement, realistic
 NOT anime, NOT manga, NOT illustration, NOT 3D rendering, NOT comic art.
 
 SUBJECT:
-A single East Asian woman in her late 20s to early 30s.
+A single East Asian woman in her late 10s to early 20s.
 She has a confident, composed, fashion-forward presence.
 Her face is original and must not resemble any real celebrity, model, public figure, or fictional character.
 She should look mature, elegant, and charismatic.
