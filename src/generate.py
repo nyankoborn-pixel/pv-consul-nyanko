@@ -43,100 +43,83 @@ def classify_news_category(entry: dict) -> str:
 
 def get_image_style_for_category(category: str) -> str:
     """
-    画像スタイル: 夜景 × 歩き × 低めアングル × 高級ファッション写真
+    画像スタイル: ネオン夜景 × ウェット&グロス × ローアングル × 光沢ドレス
     """
-def get_image_style_for_category(category: str) -> str:
-    """
-    画像スタイル: リアル寄せ強化版
-    """
-
     base_style = """
 STYLE:
-Ultra-photorealistic cinematic studio photography.
-Looks like a real high-end editorial photograph shot with a full-frame cinema camera.
-Natural skin pores, subtle skin texture, realistic facial asymmetry, realistic hair strands,
-real fabric wrinkles, believable body proportions, realistic hands and fingers.
-No plastic skin, no doll-like face, no AI-glossy texture, no over-smoothed beauty filter.
-NOT anime, NOT manga, NOT illustration, NOT 3D render, NOT cosplay poster.
+Ultra-photorealistic cinematic photography, high-end fashion editorial style.
+Emphasis on "wet and glossy" textures (sweaty/wet skin, glossy clothing, wet ground).
+Strong backlighting with vibrant neon colors to outline the subject.
+Natural skin pores, subtle skin imperfections, realistic hair strands.
+No plastic skin, no doll-like face, no anime, no illustration, no 3D render.
+This image must look indistinguishable from a real photograph.
 
 SUBJECT:
 A single East Asian woman, clearly 25 years old or older.
-She has an original face and must not resemble any real celebrity, model, public figure,
-anime character, game character, or fictional character.
-Her expression is calm, intelligent, confident, and professional.
+Original unique face, not resembling any real celebrity or fictional character.
+Confident, mysterious, and alluring expression.
 
 WARDROBE:
-A refined fashion outfit inspired by Japanese sailor-uniform design,
-reinterpreted as an adult editorial fashion look.
-Elegant, neat, tailored, modest, and non-explicit.
-No fetish styling, no overly short skirt, no exposed underwear.
+A sleek, glossy black evening dress (leather, latex, or high-gloss wet-look material) with a high slit.
+Black high heels.
+Elegant but striking fashion.
 
 POSE:
-Confident cinematic editorial pose.
-Natural shoulder angle, relaxed hands, composed posture.
-Elegant and professional, not provocative.
+Standing confidently with one leg forward, twisting the waist slightly to emphasize an S-curve silhouette.
+Capturing a dynamic, momentary movement.
 
 CAMERA:
 Aspect ratio: 16:9 landscape.
-Shot on an 85mm lens, full-frame camera, shallow depth of field.
-Three-quarter body framing.
-Camera slightly below eye level.
-Subject occupies 40-55% of the frame.
+Low angle shot, positioning the camera low to emphasize the subject's presence and leg line.
+Full-frame camera, shallow depth of field (blurred background).
 
 LIGHTING:
-Soft cinematic lighting.
-Cool blue rim light + soft key light on the face.
-Realistic reflections on glass and lab equipment.
-Natural shadow falloff.
+Dramatic neon lighting. Strong backlight outlining the silhouette.
+Neon reflections on wet skin and glossy clothing.
+Color palette: Deep red, neon purple, metallic gold, dark blue.
 
 BACKGROUND:
-Modern pharmaceutical AI laboratory at night.
-Glass walls, city skyline, lab benches, beakers, sealed document folders.
-Holographic-style panels (no readable text).
-No logos, no letters, no numbers.
+Luxurious city nightscape with towering skyscrapers and bright neon signs.
+Wet ground or glass surfaces reflecting the neon lights brilliantly.
+Slightly blurred out of focus to make the subject pop.
+No readable text, no letters, no numbers, no logos.
 
 REALISM REQUIREMENTS:
-Photorealistic original human face.
-Realistic eyes with natural catchlights.
-Correct anatomy, realistic hands, natural pose.
+Photorealistic lighting and reflections.
+Accurate human anatomy and realistic fabric physics.
 Professional cinematic color grading.
 
 ABSOLUTE PROHIBITIONS:
 No minors.
-No erotic pose.
-No fetish or sexualized styling.
 No anime, manga, cartoon, illustration, 3D rendering.
-No readable text, no letters, no numbers, no logos.
+No readable text, no letters, no numbers, no logos in the background or foreground.
 No multiple people.
 """.strip()
 
     category_scenes = {
         "regulatory": """
 CATEGORY SCENE:
-Subtle regulatory atmosphere with sealed document folders and corporate glass interiors.
-The subject appears to be leaving a high-level regulatory meeting.
+Subtle regulatory or corporate elements integrated into the neon cityscape.
 """.strip(),
 
         "ai_tech": """
 CATEGORY SCENE:
-Futuristic pharmaceutical AI environment with abstract data panels and lab equipment.
-No readable text.
+Futuristic neon cityscape with abstract holographic data floating subtly in the blurred background.
 """.strip(),
 
         "market_business": """
 CATEGORY SCENE:
-Luxury corporate environment with high-rise buildings and executive interiors.
+High-end luxury corporate rooftop at night.
 """.strip(),
 
         "china": """
 CATEGORY SCENE:
-Modern East Asian biotech city environment with glass research facilities.
+Modern East Asian cyberpunk city environment.
 """.strip(),
 
         "general": """
 CATEGORY SCENE:
-Modern pharmaceutical business environment at night.
-Clean, cinematic, professional atmosphere.
+Modern business metropolis at night.
 """.strip(),
     }
 
