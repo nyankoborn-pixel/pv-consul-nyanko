@@ -45,7 +45,12 @@ def get_image_style_for_category(category: str) -> str:
     """
     画像スタイル: 夜景 × 歩き × 低めアングル × 高級ファッション写真
     """
-base_style = """
+def get_image_style_for_category(category: str) -> str:
+    """
+    画像スタイル: リアル寄せ強化版
+    """
+
+    base_style = """
 STYLE:
 Ultra-photorealistic cinematic studio photography.
 Looks like a real high-end editorial photograph shot with a full-frame cinema camera.
@@ -64,44 +69,43 @@ WARDROBE:
 A refined fashion outfit inspired by Japanese sailor-uniform design,
 reinterpreted as an adult editorial fashion look.
 Elegant, neat, tailored, modest, and non-explicit.
-No fetish styling, no overly short skirt, no exposed underwear, no schoolgirl sexualization.
+No fetish styling, no overly short skirt, no exposed underwear.
 
 POSE:
-Confident editorial standing pose.
+Confident cinematic editorial pose.
 Natural shoulder angle, relaxed hands, composed posture.
-Elegant and cinematic, not sexual, not provocative.
+Elegant and professional, not provocative.
 
 CAMERA:
 Aspect ratio: 16:9 landscape.
 Shot on an 85mm lens, full-frame camera, shallow depth of field.
 Three-quarter body framing.
-Camera slightly below eye level, cinematic perspective.
+Camera slightly below eye level.
 Subject occupies 40-55% of the frame.
 
 LIGHTING:
-Night laboratory and city-light environment.
-Soft key light on the face, cool blue rim light, subtle warm practical lights,
-realistic glass reflections, controlled contrast, cinematic bokeh.
-No harsh HDR, no oversaturated neon, no fake glow.
+Soft cinematic lighting.
+Cool blue rim light + soft key light on the face.
+Realistic reflections on glass and lab equipment.
+Natural shadow falloff.
 
 BACKGROUND:
 Modern pharmaceutical AI laboratory at night.
-Glass walls, wet city skyline reflections, realistic lab benches, beakers,
-sealed document folders, pharmaceutical packages with no readable text,
-holographic-style data panels with abstract unreadable marks only.
-No readable signs, no logos, no letters, no numbers.
+Glass walls, city skyline, lab benches, beakers, sealed document folders.
+Holographic-style panels (no readable text).
+No logos, no letters, no numbers.
 
 REALISM REQUIREMENTS:
 Photorealistic original human face.
 Realistic eyes with natural catchlights.
-Correct anatomy, realistic hands, realistic clothing physics.
+Correct anatomy, realistic hands, natural pose.
 Professional cinematic color grading.
-High detail, natural depth, believable lens blur.
 
 ABSOLUTE PROHIBITIONS:
-No erotic pose, no fetish pose, no seductive framing.
-No nudity.
-No anime, manga, cartoon, comic, illustration, 3D rendering.
+No minors.
+No erotic pose.
+No fetish or sexualized styling.
+No anime, manga, cartoon, illustration, 3D rendering.
 No readable text, no letters, no numbers, no logos.
 No multiple people.
 """.strip()
@@ -109,46 +113,30 @@ No multiple people.
     category_scenes = {
         "regulatory": """
 CATEGORY SCENE:
-Integrate subtle regulatory or pharmaceutical governance elements into the environment:
-sealed document folders, official-looking binders, a glass corporate building,
-a refined government-office atmosphere, or abstract compliance-related objects.
-These objects must not contain readable text.
-The woman walks forward as if leaving a high-stakes regulatory meeting.
+Subtle regulatory atmosphere with sealed document folders and corporate glass interiors.
+The subject appears to be leaving a high-level regulatory meeting.
 """.strip(),
 
         "ai_tech": """
 CATEGORY SCENE:
-Integrate subtle AI and technology elements:
-blurred data dashboards on glass screens, server-room reflections, abstract interface lights,
-advanced lab equipment, or modern workstation silhouettes.
-No readable text, no numbers, no logos.
-The woman walks through a futuristic pharmaceutical AI environment at night.
+Futuristic pharmaceutical AI environment with abstract data panels and lab equipment.
+No readable text.
 """.strip(),
 
         "market_business": """
 CATEGORY SCENE:
-Integrate business and market elements:
-a high-floor corporate district, glass towers, executive lobby reflections,
-presentation folders, sleek boardroom materials, or city skyline through glass.
-No readable text, no numbers, no logos.
-The woman walks forward with executive confidence in a luxury business setting.
+Luxury corporate environment with high-rise buildings and executive interiors.
 """.strip(),
 
         "china": """
 CATEGORY SCENE:
-Integrate a modern East Asian pharmaceutical business environment:
-Shanghai or Beijing-inspired high-rise city lights, glass research facilities,
-corporate lobby reflections, or modern biotech campus atmosphere.
-Avoid traditional cultural clichés.
-No readable text, no numbers, no logos.
+Modern East Asian biotech city environment with glass research facilities.
 """.strip(),
 
         "general": """
 CATEGORY SCENE:
-Create a visually striking pharmaceutical business news image:
-modern city night, cinematic reflections, elegant corporate atmosphere,
-and subtle objects related to the article.
-No readable text, no numbers, no logos.
+Modern pharmaceutical business environment at night.
+Clean, cinematic, professional atmosphere.
 """.strip(),
     }
 
