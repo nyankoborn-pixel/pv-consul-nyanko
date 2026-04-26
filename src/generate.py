@@ -62,7 +62,10 @@ POSE:
 A seductive, sexy pose that would provoke men.
 
 WARDROBE:
-Japanese high school girls' sailor uniforms have very short skirts.
+A cute, authentic, and well-tailored high school uniform inspired by various global styles.
+Preferred styling: a classic Japanese sailor-style uniform, a stylish Korean-style uniform with a pleated skirt and fitted blazer, a traditional British school blazer with a tie, or a neat American prep school outfit.
+The outfit should be charming, neat, and highly detailed.
+Avoid explicit sexual styling, overly short skirts, or fetishized interpretations.
 
 CAMERA:
 Aspect ratio: 16:9 landscape.
