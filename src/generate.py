@@ -63,7 +63,7 @@ SUBJECT:
 A single East Asian woman, appears to be 18 years old or younger. She has a fresh, youthful, yet intelligent and confident original face.
 She has an original face and must not resemble any real celebrity, model, public figure,
 anime character, game character, or fictional character.
-Her expression is calm, intelligent, confident, and professional.
+Her expression is a full, broad, bright, and heartwarming smile.
 
 WARDROBE:
 A refined fashion outfit inspired by Japanese sailor-uniform design,
