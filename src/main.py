@@ -4,6 +4,7 @@ main.py - オーケストレーター
        generate_image → post(parent with image) → post_reply(source URL) → log
 
 PV関連性判定により無関係な記事はスキップして次の候補に進む。
+会員専用記事(指定ドメイン×短文)もスキップ対象。
 """
 import json
 import sys
@@ -22,6 +23,7 @@ from generate import (
 )
 from validate import validate_post
 from post_x import post_to_x, post_reply
+from filter_restricted import is_member_only_article
 
 
 POSTED_LOG = Path("logs/posted.jsonl")
@@ -72,9 +74,17 @@ def run(dry_run: bool = False) -> int:
     successful_entry = None
     successful_post = None
     skip_count = 0
+    skip_member_only_count = 0
     
     for i, entry in enumerate(scored[:MAX_RETRIES]):
         print(f"\n--- Attempt {i+1}: {entry['title'][:80]} ---")
+        
+        # 会員専用記事の判定(restricted_domains × summary 短文)
+        if is_member_only_article(entry):
+            print(f"  ⊘ Skipped (会員専用記事と推定): {entry.get('link', '')}")
+            skip_member_only_count += 1
+            continue
+        
         try:
             result = try_generate_and_validate(entry, character)
         except PVNotRelatedError as e:
@@ -99,7 +109,9 @@ def run(dry_run: bool = False) -> int:
         break
     
     if not successful_post:
-        print(f"\n⚠ No valid post could be generated. Skipped(PV無関係)={skip_count}件. Exiting.")
+        print(f"\n⚠ No valid post could be generated. "
+              f"Skipped(PV無関係)={skip_count}件, "
+              f"Skipped(会員専用)={skip_member_only_count}件. Exiting.")
         return 1
     
     post_text = successful_post["post"]
@@ -160,6 +172,7 @@ def run(dry_run: bool = False) -> int:
         "image_prompt": image_prompt,
         "had_image": bool(image_path),
         "skipped_pv_unrelated": skip_count,
+        "skipped_member_only": skip_member_only_count,
         "parent_tweet_id": parent_id,
         "parent_tweet_url": result["url"],
         "reply_tweet_id": reply_result["tweet_id"] if reply_result else None,
