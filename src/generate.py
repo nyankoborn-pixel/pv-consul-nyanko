@@ -63,7 +63,7 @@ SUBJECT:
 A single East Asian woman, appears to be 18 years old or younger. She has a fresh, youthful, yet intelligent and confident original face.
 She has an original face and must not resemble any real celebrity, model, public figure,
 anime character, game character, or fictional character.
-Her expression is a full, broad, bright, and heartwarming smile.
+Her expression is a glowing, mischievous, full, heartwarming smile. Her eyes are wide, bright, and focused intensely on the camera from her downward perspective.
 
 WARDROBE:
 A refined fashion outfit inspired by Japanese sailor-uniform design,
@@ -72,9 +72,7 @@ Elegant, neat, tailored, modest, and non-explicit.
 No fetish styling, no overly short skirt, no exposed underwear.
 
 POSE:
-Confident cinematic editorial pose.
-Natural shoulder angle, relaxed hands, composed posture.
-Elegant and professional, not provocative.
+The subject is leaning down close toward the camera, peering down into the lens. Her head is tilted slightly. Because of the extreme low camera angle, she is looking down with large, "upturned eyes" (uwame-ukai) directly at the viewer. Her shoulders are prominent in the foreground.
 
 CAMERA:
 Aspect ratio: 16:9 landscape.
