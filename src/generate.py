@@ -79,9 +79,7 @@ Elegant and professional, not provocative.
 CAMERA:
 Aspect ratio: 16:9 landscape.
 Shot on an 85mm lens, full-frame camera, shallow depth of field.
-Three-quarter body framing.
-Camera slightly below eye level.
-Subject occupies 40-55% of the frame.
+Extreme close-up shot (head and shoulders only). Camera is at an extremely low angle, looking sharply upward at the subject. Subject's face dominates the frame, occupying 80-90%.
 
 LIGHTING:
 Soft cinematic lighting.
