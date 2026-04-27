@@ -103,8 +103,6 @@ Professional cinematic color grading.
 
 ABSOLUTE PROHIBITIONS:
 No minors.
-No erotic pose.
-No fetish or sexualized styling.
 No anime, manga, cartoon, illustration, 3D rendering.
 No readable text, no letters, no numbers, no logos.
 No multiple people.
