@@ -60,7 +60,7 @@ No plastic skin, no doll-like face, no AI-glossy texture, no over-smoothed beaut
 NOT anime, NOT manga, NOT illustration, NOT 3D render, NOT cosplay poster.
 
 SUBJECT:
-A single East Asian woman, appears to be 25 years old or younger. She has a fresh, youthful, yet intelligent and confident original face.
+A single East Asian woman, appears to be 18 years old or younger. She has a fresh, youthful, yet intelligent and confident original face.
 She has an original face and must not resemble any real celebrity, model, public figure,
 anime character, game character, or fictional character.
 Her expression is calm, intelligent, confident, and professional.
