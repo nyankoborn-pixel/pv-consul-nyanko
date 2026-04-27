@@ -1,10 +1,11 @@
 """
 generate.py - Gemini で要約+画像プロンプト+画像を生成
 The Rundown AI 型: 親ポストに画像、自リプライにソースURL
-画像路線: 夜景 × 歩き × 低めアングル × 高級ファッション写真
+画像路線: 各国伝統衣装×ネオン東京の夜景×ハイファッション写真
 PV関連性判定: 記事がPV/医薬品と無関係なら投稿スキップ
 """
 import os
+import random
 import yaml
 import google.generativeai as genai
 
@@ -16,63 +17,192 @@ def load_character(config_path: str = "config/character.yml") -> dict:
 
 def classify_news_category(entry: dict) -> str:
     text = f"{entry.get('title', '')} {entry.get('summary', '')} {entry.get('source_name', '')}".lower()
-    
+
     ai_kw = ["ai", "人工知能", "機械学習", "machine learning", "llm", "生成ai",
              "generative", "automation", "自動化", "デジタル", "dx"]
     if any(kw in text for kw in ai_kw):
         return "ai_tech"
-    
+
     reg_kw = ["guidance", "guideline", "ガイダンス", "ガイドライン", "regulation",
               "規制", "fda", "ema", "pmda", "ich", "cioms", "通達", "通知", "発出",
               "gvp", "薬機法"]
     if any(kw in text for kw in reg_kw):
         return "regulatory"
-    
+
     market_kw = ["市場", "market", "億円", "億ドル", "billion", "million", "成長",
                  "growth", "シェア", "買収", "acquisition", "提携", "契約",
                  "戦略", "組織", "再編", "アウトソース"]
     if any(kw in text for kw in market_kw):
         return "market_business"
-    
+
     china_kw = ["中国", "nmpa", "cde", "china"]
     if any(kw in text for kw in china_kw):
         return "china"
-    
+
     return "general"
 
 
-def get_image_style_for_category(category: str) -> str:
-    """
-    画像スタイル: 夜景 × 歩き × 低めアングル × 高級ファッション写真
-    """
-def get_image_style_for_category(category: str) -> str:
-    """
-    画像スタイル: リアル寄せ強化版
-    """
+# ============================================================
+# 伝統衣装ライブラリ(世界の人気伝統衣装トップ20)
+# 各エントリは「Outfit:」セクションに直接挿入される
+# ============================================================
+TRADITIONAL_WARDROBES = [
+    {
+        "country": "Japan",
+        "outfit": "Modern reinterpretation of Japanese kimono. Silk fabric with subtle floral patterns, "
+                  "elegant obi sash, refined silhouette, premium materials, subtle decorative details. "
+                  "Modest, tailored, and editorial."
+    },
+    {
+        "country": "Korea",
+        "outfit": "Modern reinterpretation of Korean hanbok (chima jeogori). Vibrant chima skirt with high waistline "
+                  "and short jeogori jacket with delicate embroidery, premium silk material, refined silhouette, "
+                  "subtle decorative details. Modest and elegant."
+    },
+    {
+        "country": "China",
+        "outfit": "Modern reinterpretation of Chinese qipao/cheongsam. Form-fitting silk dress with mandarin collar, "
+                  "intricate floral embroidery, side slit at modest length, premium fabric, refined silhouette, "
+                  "subtle decorative details."
+    },
+    {
+        "country": "India",
+        "outfit": "Modern reinterpretation of Indian saree. Flowing silk saree with intricate gold zari embroidery, "
+                  "elegant pleating, premium materials, subtle decorative details. Tailored and editorial."
+    },
+    {
+        "country": "Vietnam",
+        "outfit": "Modern reinterpretation of Vietnamese ao dai. Long flowing silk tunic over loose pants, "
+                  "fitted bodice with mandarin collar, refined silhouette, premium materials, "
+                  "subtle decorative details, elegant and modest."
+    },
+    {
+        "country": "Thailand",
+        "outfit": "Modern reinterpretation of Thai chut thai. Silk wraparound skirt (pha sin) with intricate woven patterns, "
+                  "matching shoulder sash, elegant gold accessories, refined silhouette, "
+                  "premium materials, subtle decorative details."
+    },
+    {
+        "country": "Indonesia",
+        "outfit": "Modern reinterpretation of Indonesian kebaya with batik fabric. Embroidered fitted blouse with "
+                  "intricate batik patterned skirt, premium silk and lace materials, refined silhouette, "
+                  "subtle decorative details, elegant and modest."
+    },
+    {
+        "country": "Russia",
+        "outfit": "Modern reinterpretation of Russian sarafan. Long jumper-style dress with intricate folk embroidery, "
+                  "white blouse with puffed sleeves, ornate kokoshnik headdress with pearls, premium materials, "
+                  "subtle decorative details."
+    },
+    {
+        "country": "Spain",
+        "outfit": "Modern reinterpretation of Spanish flamenco dress. Layered ruffled silk dress in deep red, "
+                  "fitted bodice with elegant lace details, intricate embroidery, refined silhouette, "
+                  "premium materials, subtle decorative details."
+    },
+    {
+        "country": "Scotland",
+        "outfit": "Modern reinterpretation of Scottish highland attire. Tailored tartan kilt skirt in classic plaid, "
+                  "fitted velvet jacket with silver buttons, white blouse, sash with brooch, premium wool materials, "
+                  "refined silhouette, subtle decorative details."
+    },
+    {
+        "country": "Mexico",
+        "outfit": "Modern reinterpretation of Mexican Tehuana dress. Elegant huipil top with intricate floral embroidery, "
+                  "long flowing skirt with lace trim, vibrant colors, premium materials, refined silhouette, "
+                  "subtle decorative details, elegant and editorial."
+    },
+    {
+        "country": "Nigeria",
+        "outfit": "Modern reinterpretation of Nigerian iro and buba with gele headwrap. Vibrant ankara-print fabric, "
+                  "elegant wrap skirt, fitted blouse, ornate matching headwrap, premium materials, "
+                  "refined silhouette, subtle decorative details."
+    },
+    {
+        "country": "Morocco",
+        "outfit": "Modern reinterpretation of Moroccan kaftan. Long flowing silk kaftan with intricate gold thread "
+                  "embroidery, elegant beaded belt, refined silhouette, premium materials, subtle decorative details, "
+                  "modest and editorial."
+    },
+    {
+        "country": "Peru",
+        "outfit": "Modern reinterpretation of Peruvian Andean dress. Hand-woven wool poncho with intricate geometric patterns, "
+                  "embroidered blouse, layered skirt with traditional motifs, ornate hat, premium materials, "
+                  "refined silhouette, subtle decorative details."
+    },
+    {
+        "country": "Egypt",
+        "outfit": "Modern reinterpretation of Egyptian-inspired attire. Flowing linen dress with gold-embroidered "
+                  "pharaonic motifs, elegant beaded collar necklace, gold cuff bracelets, refined silhouette, "
+                  "premium materials, subtle decorative details."
+    },
+    {
+        "country": "Hawaii",
+        "outfit": "Modern reinterpretation of Hawaiian holoku. Long elegant gown with high neckline and train, "
+                  "tropical floral lei garland, premium silk materials, refined silhouette, "
+                  "subtle decorative details, modest and editorial."
+    },
+    {
+        "country": "Germany",
+        "outfit": "Modern reinterpretation of Bavarian dirndl. Fitted bodice with white blouse, "
+                  "full pleated skirt in elegant fabric, embroidered apron with delicate trim, "
+                  "premium materials, refined silhouette, subtle decorative details."
+    },
+    {
+        "country": "Greece",
+        "outfit": "Modern reinterpretation of Greek foustanella-inspired dress. Flowing white pleated skirt, "
+                  "embroidered fitted vest with gold thread, white blouse with bell sleeves, "
+                  "premium silk materials, refined silhouette, subtle decorative details."
+    },
+    {
+        "country": "Philippines",
+        "outfit": "Modern reinterpretation of Filipino terno or Maria Clara. Elegant gown with iconic butterfly sleeves, "
+                  "fitted bodice with intricate embroidery, long flowing skirt, premium piña silk materials, "
+                  "refined silhouette, subtle decorative details."
+    },
+    {
+        "country": "Mongolia",
+        "outfit": "Modern reinterpretation of Mongolian deel. Long silk robe with high collar and intricate brocade patterns, "
+                  "elegant silk sash at the waist, ornate silver jewelry, premium materials, "
+                  "refined silhouette, subtle decorative details."
+    },
+]
 
-    base_style = """
+
+def pick_random_wardrobe() -> dict:
+    """伝統衣装をランダムに1つ選ぶ"""
+    return random.choice(TRADITIONAL_WARDROBES)
+
+
+def get_image_style_for_category(category: str) -> str:
+    """
+    画像スタイル: 各国伝統衣装 × ネオン東京の夜景 × グロッシー・ハイファッション
+    """
+    wardrobe = pick_random_wardrobe()
+
+    base_style = f"""
 STYLE:
-Ultra-photorealistic cinematic studio photography.
-Looks like a real high-end editorial photograph shot with a full-frame cinema camera.
-Natural skin pores, subtle skin texture, realistic facial asymmetry, realistic hair strands,
-real fabric wrinkles, believable body proportions, realistic hands and fingers.
-No plastic skin, no doll-like face, no AI-glossy texture, no over-smoothed beauty filter.
-NOT anime, NOT manga, NOT illustration, NOT 3D render, NOT cosplay poster.
+Ultra-realistic cinematic portrait, hyperrealistic fashion photography style.
+Looks like a real high-end editorial photograph, professional fashion photography, masterpiece, sharp focus.
+8k, ultra detailed, photorealistic, HDR, filmic color grading.
+NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT 3D render.
 
 SUBJECT:
-A single East Asian woman, clearly 25 years old or older.
+A young East Asian woman in her mid-20s, elegant and confident expression, symmetrical face,
+large expressive eyes, smooth jawline, slightly glossy lips, natural refined makeup.
+Skin is highly detailed with a wet glossy texture, subtle sweat, realistic pores,
+and strong specular highlights reflecting on cheekbones, shoulders, and collarbone.
+Long wavy dark hair, slightly tousled with a natural sense of motion.
 She has an original face and must not resemble any real celebrity, model, public figure,
 anime character, game character, or fictional character.
-Her expression is calm, intelligent, confident, and professional.
 
 WARDROBE:
-A refined fashion outfit inspired by Japanese sailor-uniform design,
-reinterpreted as an adult editorial fashion look.
-Elegant, neat, tailored, modest, and non-explicit.
-No fetish styling, no overly short skirt, no exposed underwear.
+{wardrobe['outfit']}
+The outfit is elegant, modest, non-explicit, refined, and editorial.
+No fetish styling, no overly revealing cuts.
 
 POSE:
-Confident cinematic editorial pose.
+Pose is elegant and confident, body slightly turned with head looking back toward the camera.
 Natural shoulder angle, relaxed hands, composed posture.
 Elegant and professional, not provocative.
 
@@ -84,16 +214,16 @@ Camera slightly below eye level.
 Subject occupies 40-55% of the frame.
 
 LIGHTING:
-Soft cinematic lighting.
-Cool blue rim light + soft key light on the face.
-Realistic reflections on glass and lab equipment.
-Natural shadow falloff.
+Dramatic high-contrast cinematic lighting.
+Strong neon red and blue rim lighting, cinematic reflections, soft glow,
+and wet surface light scattering creating a glossy, luminous look.
+Realistic specular highlights on skin and fabric.
 
 BACKGROUND:
-Modern pharmaceutical AI laboratory at night.
-Glass walls, city skyline, lab benches, beakers, sealed document folders.
-Holographic-style panels (no readable text).
-No logos, no letters, no numbers.
+Nighttime urban scene inspired by Tokyo / Roppongi.
+Filled with neon signage, blurred bokeh lights, wet street reflections,
+modern skyscrapers, glass facades.
+No readable text, no logos.
 
 REALISM REQUIREMENTS:
 Photorealistic original human face.
@@ -102,52 +232,57 @@ Correct anatomy, realistic hands, natural pose.
 Professional cinematic color grading.
 
 ABSOLUTE PROHIBITIONS:
-No minors.
-No erotic pose.
-No fetish or sexualized styling.
+No minors. Subject is clearly a confident adult woman in her mid-20s.
+No erotic pose. No fetish styling.
 No anime, manga, cartoon, illustration, 3D rendering.
 No readable text, no letters, no numbers, no logos.
 No multiple people.
+No extra limbs, no deformed anatomy, no distortion.
 """.strip()
 
     category_scenes = {
         "regulatory": """
-CATEGORY SCENE:
-Subtle regulatory atmosphere with sealed document folders and corporate glass interiors.
-The subject appears to be leaving a high-level regulatory meeting.
+CATEGORY SCENE NOTE:
+Subtle regulatory atmosphere. The neon-lit Tokyo street includes a glimpse of a corporate skyscraper
+or government-style modern architecture in the bokeh background.
 """.strip(),
 
         "ai_tech": """
-CATEGORY SCENE:
-Futuristic pharmaceutical AI environment with abstract data panels and lab equipment.
-No readable text.
+CATEGORY SCENE NOTE:
+Futuristic atmosphere. The neon-lit Tokyo background includes faint holographic-style light effects
+and abstract digital glow patterns reflecting on wet pavement.
 """.strip(),
 
         "market_business": """
-CATEGORY SCENE:
-Luxury corporate environment with high-rise buildings and executive interiors.
+CATEGORY SCENE NOTE:
+Luxury corporate atmosphere. The neon-lit Tokyo background features high-rise glass buildings
+and upscale district vibes (Roppongi / Marunouchi style).
 """.strip(),
 
         "china": """
-CATEGORY SCENE:
-Modern East Asian biotech city environment with glass research facilities.
+CATEGORY SCENE NOTE:
+The neon-lit night scene has an East Asian mega-city feel with vibrant signage and
+modern skyscrapers in the bokeh background.
 """.strip(),
 
         "general": """
-CATEGORY SCENE:
-Modern pharmaceutical business environment at night.
-Clean, cinematic, professional atmosphere.
+CATEGORY SCENE NOTE:
+Standard neon-lit Tokyo Roppongi atmosphere. Wet streets, vibrant signage,
+modern urban energy.
 """.strip(),
     }
 
-    return f"{base_style}\n\n{category_scenes.get(category, category_scenes['general'])}"
+    # 衣装の国情報を最後にコメントで残す(ログ・デバッグ用)
+    country_note = f"\n# Selected wardrobe: {wardrobe['country']}\n"
+
+    return f"{base_style}\n\n{category_scenes.get(category, category_scenes['general'])}{country_note}"
 
 
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
     category = classify_news_category(entry)
     image_style = get_image_style_for_category(category)
-    
+
     prompt = f"""あなたは「{char['name']}」というキャラクターです。
 PVニュースのXポスト用に、読者の手を止める日本語要約と、
 雑誌表紙のような画像プロンプトを生成してください。
@@ -234,16 +369,24 @@ summary には、原文に明示的に書かれている事実だけを記述す
 ステップ2: 人物が何をしている瞬間かを決める
 ステップ3: ステップ1とステップ2を組み合わせて image_prompt を書く
 
-スタイル指示(必ず以下の内容を image_prompt に含めること):
+スタイル指示(必ず以下の内容を image_prompt に含めること。
+WARDROBE で指定された衣装は変更せずそのまま使うこと):
 {image_style}
 
 【image_prompt 必須要件】
-- 具体的なオブジェクトを3つ以上、画像内に配置
-- 「抽象的」「シンボリック」だけで終わらせず、具体的に何が映るかを書く
+- 上記スタイル指示の SUBJECT, WARDROBE, POSE, CAMERA, LIGHTING, BACKGROUND を
+  すべて反映すること
+- WARDROBE は上記指定をそのまま使い、別の衣装に置き換えないこと
+- ニュースに関連する具体的なオブジェクトを2〜3個、背景の bokeh の中に追加してよい
+  (例: 製薬関連なら blurred laboratory equipment, regulatory なら blurred document folders)
 - Aspect ratio: 16:9 landscape
 - Photorealistic original human face required
 - NO text, NO letters, NO numbers, NO logos
-- Length: 100-150 English words
+- Length: 180-260 English words
+- 末尾に Negative prompt として:
+  "Negative prompt: no cartoon, no anime, no illustration, no low quality, no blur,
+  no distortion, no extra limbs, no deformed anatomy, no minors, no readable text"
+  を必ず含めること
 
 【原文情報】
 タイトル: {entry['title']}
@@ -260,9 +403,9 @@ def generate_post_content(entry: dict, character: dict) -> dict:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY environment variable is not set")
-    
+
     genai.configure(api_key=api_key)
-    
+
     model = genai.GenerativeModel(
         "gemini-2.5-flash",
         generation_config={
@@ -272,28 +415,28 @@ def generate_post_content(entry: dict, character: dict) -> dict:
             "response_mime_type": "application/json",
         },
     )
-    
+
     prompt = build_prompt(entry, character)
     response = model.generate_content(prompt)
     text = response.text.strip()
-    
+
     import json
     import re
     text = re.sub(r"^```(?:json)?\s*", "", text)
     text = re.sub(r"\s*```$", "", text)
-    
+
     try:
         result = json.loads(text)
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Failed to parse Gemini JSON output: {e}\nRaw: {text}")
-    
+
     if result.get("is_pv_related") is False:
         skip_reason = result.get("skip_reason", "PVと無関係と判定")
         raise PVNotRelatedError(f"Skipped: {skip_reason}")
-    
+
     if "summary" not in result or "image_prompt" not in result:
         raise RuntimeError(f"Gemini output missing required fields: {result}")
-    
+
     result["_category"] = classify_news_category(entry)
     return result
 
@@ -306,10 +449,10 @@ class PVNotRelatedError(Exception):
 def select_hashtags(entry: dict, character: dict) -> list:
     hashtags_config = character["hashtags"]
     tags = list(hashtags_config["always"])
-    
+
     matched_lower = [kw.lower() for kw in entry.get("matched_keywords", [])]
     text = f"{entry['title']} {entry['summary']}".lower()
-    
+
     if any(x in text for x in ["ai", "artificial intelligence", "machine learning", "llm"]):
         tags.extend(hashtags_config["conditional"]["ai"][:1])
     if any(x in matched_lower for x in ["guidance", "guideline", "fda approval", "ema approval", "ich"]):
@@ -320,7 +463,7 @@ def select_hashtags(entry: dict, character: dict) -> list:
         tags.extend(hashtags_config["conditional"]["icsr"][:1])
     if "pmda" in entry["source_name"].lower() or "pmda" in text:
         tags.extend(hashtags_config["conditional"]["pmda"][:1])
-    
+
     seen = set()
     unique_tags = []
     for t in tags:
@@ -329,7 +472,7 @@ def select_hashtags(entry: dict, character: dict) -> list:
             unique_tags.append(t)
         if len(unique_tags) >= 4:
             break
-    
+
     unique_tags.append(character["ai_disclosure"])
     return unique_tags
 
@@ -342,11 +485,11 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
     hashtags_str = " ".join(tags)
     summary = gen["summary"]
     max_total = character.get("max_chars", 278)
-    
+
     full_post = f"{summary}\n\n{hashtags_str}"
     if len(full_post) <= max_total:
         return full_post
-    
+
     minimal_tags = " ".join([
         character["hashtags"]["always"][0],
         character["hashtags"]["always"][1],
@@ -355,7 +498,7 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
     minimal_post = f"{summary}\n\n{minimal_tags}"
     if len(minimal_post) <= max_total:
         return minimal_post
-    
+
     overhead = len(f"\n\n{minimal_tags}")
     allowed_summary = max_total - overhead
     if allowed_summary > 1:
@@ -371,13 +514,13 @@ def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") 
     if not api_key:
         print("[image] GEMINI_API_KEY not set, skipping image generation")
         return None
-    
+
     try:
         from google import genai as new_genai
         from google.genai import types
-        
+
         client = new_genai.Client(api_key=api_key)
-        
+
         response = client.models.generate_content(
             model="gemini-2.5-flash-image",
             contents=image_prompt,
@@ -388,7 +531,7 @@ def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") 
                 ),
             ),
         )
-        
+
         for part in response.parts:
             if part.inline_data and part.inline_data.data:
                 image_bytes = part.inline_data.data
@@ -396,10 +539,10 @@ def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") 
                     f.write(image_bytes)
                 print(f"[image] Saved to {output_path} ({len(image_bytes)} bytes)")
                 return output_path
-        
+
         print("[image] No image data in response")
         return None
-    
+
     except Exception as e:
         print(f"[image] Generation failed: {e}")
         return None
