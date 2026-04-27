@@ -1,0 +1,16 @@
+# 会員専用記事の除外設定
+#
+# 仕組み:
+# - restricted_domains に登録されたドメインの記事については、
+#   要約(summary)の文字数が min_summary_length 未満なら会員限定記事と推定して除外する
+# - リストにないドメインは通常通り処理(文字数チェックなし)
+# - これにより、同じドメイン内で全文公開記事は通し、会員限定記事だけ除外できる
+
+restricted_domains:
+  - pnb.jiho.jp        # 時事通信ファーマ
+  - mixonline.jp       # ミクスオンライン
+  - risfax.co.jp       # リスファックス
+  - yakuji.co.jp       # 薬事日報
+  - nikkei.com         # 日経電子版
+
+min_summary_length: 350
