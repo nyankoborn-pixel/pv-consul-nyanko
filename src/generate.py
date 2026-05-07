@@ -16,35 +16,28 @@ def load_character(config_path: str = "config/character.yml") -> dict:
 
 def classify_news_category(entry: dict) -> str:
     text = f"{entry.get('title', '')} {entry.get('summary', '')} {entry.get('source_name', '')}".lower()
-
-    # 【一時切替 2026/5/7-5/13】ハンタウイルス特集中は感染症カテゴリを優先
-    outbreak_kw = ["ハンタウイルス", "hantavirus", "肺症候群", "腎症候性出血熱",
-                   "クルーズ船", "アウトブレイク", "outbreak", "集団発生",
-                   "オルソハンタウイルス"]
-    if any(kw.lower() in text for kw in outbreak_kw):
-        return "outbreak"
-
+    
     ai_kw = ["ai", "人工知能", "機械学習", "machine learning", "llm", "生成ai",
              "generative", "automation", "自動化", "デジタル", "dx"]
     if any(kw in text for kw in ai_kw):
         return "ai_tech"
-
+    
     reg_kw = ["guidance", "guideline", "ガイダンス", "ガイドライン", "regulation",
               "規制", "fda", "ema", "pmda", "ich", "cioms", "通達", "通知", "発出",
               "gvp", "薬機法"]
     if any(kw in text for kw in reg_kw):
         return "regulatory"
-
+    
     market_kw = ["市場", "market", "億円", "億ドル", "billion", "million", "成長",
                  "growth", "シェア", "買収", "acquisition", "提携", "契約",
                  "戦略", "組織", "再編", "アウトソース"]
     if any(kw in text for kw in market_kw):
         return "market_business"
-
+    
     china_kw = ["中国", "nmpa", "cde", "china"]
     if any(kw in text for kw in china_kw):
         return "china"
-
+    
     return "general"
 
 
@@ -112,16 +105,6 @@ No multiple people.
 """.strip()
 
     category_scenes = {
-        "outbreak": """
-CATEGORY SCENE:
-Public health emergency operations center at night.
-Wall-mounted world map showing the South Atlantic shipping route, abstract incidence curves on holographic panels (no readable text).
-The subject is reviewing risk-assessment documents inside a calm, controlled situation room.
-A distant view of a large cruise ship through tall glass windows.
-Atmosphere is serious, composed, and professional — never sensational, never alarming.
-No biohazard symbols, no protective suits, no rodents, no overt fear cues.
-""".strip(),
-
         "regulatory": """
 CATEGORY SCENE:
 Subtle regulatory atmosphere with sealed document folders and corporate glass interiors.
@@ -158,93 +141,86 @@ def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
     category = classify_news_category(entry)
     image_style = get_image_style_for_category(category)
-    is_override = bool(entry.get("_url_override"))
-
-    # 【一時切替 2026/5/7-5/13】ハンタウイルス特集中は関連性判定を「感染症/PV」に拡張
-    relevance_block = """【最初の判定 - 極めて重要】
-このニュースが以下のいずれかに該当するかを判定してください。
-  (A) ハンタウイルスを含む新興・再興感染症の集団発生・リスク評価・公衆衛生対応
-  (B) PV(医薬品安全性監視)/医薬品/製薬業界の話題
-いずれかに該当 → is_pv_related=true として要約を生成
-どちらにも無関係 → is_pv_related=false で skip_reason を返す
-
-該当する例:
-- ハンタウイルス感染症(肺症候群・腎症候性出血熱)に関する報告・リスク評価
-- WHO/ECDC/CDC/JIHS/PMDA/FDA/EMA など公衆衛生・規制当局の発信
-- クルーズ船・国際旅行に関連した感染症集団発生
-- 医薬品の安全性管理、副作用監視、ICSR、シグナル検出
-- 製薬企業の戦略、組織変更、AI/DX導入
-- 感染症ワクチン・治療薬の安全性関連情報
-
-該当しない例:
-- 物理学・化学の研究
-- 一般的なIT企業のAIガバナンス
-- 食品、化粧品、サプリメント
-- 政治・経済一般、芸能、スポーツ
-"""
-
-    if is_override:
-        relevance_block = """【判定スキップ】
-このニュースは編集者が直接指定した1次情報であり、関連性判定はスキップしてください。
-必ず is_pv_related=true として、原文に書かれている事実のみで要約を生成すること。
-"""
-
+    
     prompt = f"""あなたは「{char['name']}」というキャラクターです。
-公衆衛生・PV関連ニュースのXポスト用に、読者の手を止める日本語要約と、
+PVニュースのXポスト用に、読者の手を止める日本語要約と、
 雑誌表紙のような画像プロンプトを生成してください。
 
 【キャラクター設定】
 - 名前: {char['name']}
 - 性格: {", ".join(char['personality'])}
-- スタイル: 静かに本質を見抜くPV/公衆衛生コンサルの視点。データと一次情報で語る
+- スタイル: 静かに本質を見抜くPVコンサルの視点。データと業界知見で語る
 
 【今回のニュースカテゴリ】 {category}
 
-{relevance_block}
+【最初の判定 - 極めて重要】
+このニュースが「PV(医薬品安全性監視)/医薬品/製薬業界」と
+直接関係あるかを判定してください。
+
+PVに関係ある例:
+- 医薬品の安全性管理、副作用監視、ICSR、シグナル検出
+- 製薬企業の戦略、組織変更、AI/DX導入
+- 規制制度(GVP省令、ICH ガイドライン、PMDA/FDA/EMA の発出)
+- 医薬品AI、製薬AI、医療AIの中で薬と関わるもの
+
+PVに関係ない例:
+- 一般的なIT企業のAIガバナンス
+- 物理学・化学の研究
+- 医療機関(病院)の運営の話で薬と無関係
+- 食品、化粧品、サプリメント
+- 一般的なAI規制の話で医薬品と無関係
+
+判定方法:
+- 原文に「医薬品」「製薬」「PV」「ファーマコビジランス」「副作用」
+  「ICSR」「シグナル検出」「FDA/EMA/PMDA」のいずれか、または
+  製薬企業名・医薬品関連の固有名詞が明示されている → "yes"
+- 原文に上記がなく、強引にPVに寄せないと書けない → "no"
 
 【出力形式】
-該当しない場合:
+PVに関係ない場合(is_pv_related=false):
 {{
   "is_pv_related": false,
-  "skip_reason": "短い理由"
+  "skip_reason": "なぜPVと無関係と判断したか短く記載"
 }}
 
-該当する場合:
+PVに関係ある場合(is_pv_related=true):
 {{
   "is_pv_related": true,
   "summary": "120-180字、フックのある日本語要約",
   "image_prompt": "180-260 words、英語の画像プロンプト"
 }}
 
-【summary 設計指針 - 極めて重要】
-読者の手をタイムライン上で止めることを最優先する。
+【summary 設計指針(is_pv_related=true の時のみ)- 極めて重要】
+読者(PVコンサル、製薬企業の安全性管理担当、規制当局関係者)の手を
+タイムライン上で止めることを最優先する。
 
 書き方:
-1. 冒頭1文目で「何が起きたか」または「なぜこのニュースが重要か」を提示する。
-   役所主語(「○○省は」「JIHSは」)で始めない。
-   主役(ウイルス・薬・技術・場所・規制)を主語にする。
+1. 冒頭1文目で「なぜこのニュースが面白いか」を提示する。
+   役所主語(「○○省は」「PMDAは」)で始めない。
+   ニュースの主役(薬、技術、企業、トレンド)を主語にする。
 2. 数値・日付・固有名詞は原文に明記されている範囲で自由に使ってよい。
-   略語(HPS/HFRS/ICSR等)は原文に明記がなければ使わず、フルスペルで書く。
-3. 末尾の汎用的な締め(「動向を注視」「対応が求められる」等)は禁止。
+   原文がPV略語(ICSR/PSUR/RMP/PBRER等)に言及していなければ、
+   フルスペルまたは一般用語で記述すること。
+3. 末尾の汎用的な締め(「医療従事者は確認すべき」「動向を注視」等)は禁止。
 4. 文末は「〜とのこと」「〜と報告されている」「〜と発表された」など。
-5. 不安を煽る表現(「危険」「パンデミック」「警戒」)は使わない。
-   感染症ニュースであっても、淡々と事実だけを伝える落ち着いたトーン。
 
 【極めて重要な制約 - ハルシネーション防止】
 summary には、原文に明示的に書かれている事実だけを記述すること。
 以下を絶対に書かないこと:
 - 原文に書かれていない「業界の見立て」「構造分析」「推測」「示唆」
-- 原文に書かれていない他の事案との「連動」「影響」「波及」
+- 原文に書かれていない他の制度・施策との「連動」「影響」「波及」
 - 原文に書かれていない「変化の可能性」「求められる対応」「今後の展開」
 - 「示唆されている」「可能性がある」「求められる」「見られる」など
   推測を匂わせる表現で、原文にない内容を補完すること
 
-原文が短ければそれで書ける範囲だけで要約する。情報量が足りなくても推測で補わない。
+原文が短いリード文しかなくても、それで書ける範囲だけで要約すること。
+情報量が足りないと感じても、推測で補ってはならない。
+要約が短くなる場合はそれでよい。
 
 【厳守】
-- 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」「ワクチン接種すべき」など)は禁止。
-- 特定企業・国・地域への攻撃的批判は禁止。
-- 感染症の場合、不要に恐怖を煽らない(「死亡」等の事実は淡々と記述)。
+- 原文が医薬品/PVと無関係なら、無理に医薬品の話に寄せず
+  is_pv_related=false で返すこと。これが最も重要。
+- 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」など)は禁止。
 
 【image_prompt 設計指針】
 ニュース内容を視覚化するため、3ステップを実行する:
@@ -261,7 +237,6 @@ summary には、原文に明示的に書かれている事実だけを記述す
 - Aspect ratio: 16:9 landscape
 - Photorealistic original human face required
 - NO text, NO letters, NO numbers, NO logos
-- 感染症テーマでも biohazard 標識・防護服・げっ歯類・恐怖を煽る描写は禁止
 - Length: 100-150 English words
 
 【原文情報】
@@ -269,7 +244,8 @@ summary には、原文に明示的に書かれている事実だけを記述す
 要約: {entry['summary'][:1500]}
 ソース: {entry['source_name']}
 
-判定 → JSON出力。前後に説明文を付けないこと。
+最初に is_pv_related の判定をしてから、JSON形式で出力してください。
+前後に説明文を付けないこと。
 """
     return prompt
 

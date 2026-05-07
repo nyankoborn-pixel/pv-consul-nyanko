@@ -1,62 +1,109 @@
-# 【一時切替: 2026/5/7-5/13 ハンタウイルス特集】
-# 通常の PV ニュース構成は pre-hantavirus-2026-05-07 タグに退避済み。
-# 2026/5/14 以降に REVERT_NOTES.md の手順で復元する。
+# PVニュースソース設定 - PV専業を最優先、複合クエリで誤マッチ防止
 
 sources:
-  # ===== 国内一次情報 =====
-
-  - name: "JIHS リスク評価"
-    url: "https://news.google.com/rss/search?q=%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9+OR+%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9%E8%82%BA%E7%97%87%E5%80%99%E7%BE%A4+OR+%E8%85%8E%E7%97%87%E5%80%99%E7%BE%A4%E6%80%A7%E5%87%BA%E8%A1%80%E7%86%B1+site%3Ajihs.go.jp&hl=ja&gl=JP&ceid=JP:ja"
+  # ===== 製薬企業 PV戦略・組織動向(日本) =====
+  
+  - name: "日本大手製薬 PV戦略"
+    url: "https://news.google.com/rss/search?q=%28%E6%AD%A6%E7%94%B0%E8%96%AC%E5%93%81+OR+%E3%82%A2%E3%82%B9%E3%83%86%E3%83%A9%E3%82%B9+OR+%E7%AC%AC%E4%B8%80%E4%B8%89%E5%85%B1+OR+%E4%B8%AD%E5%A4%96%E8%A3%BD%E8%96%AC+OR+%E3%82%A8%E3%83%BC%E3%82%B6%E3%82%A4+OR+%E5%A4%A7%E5%A1%9A%E8%A3%BD%E8%96%AC+OR+%E5%8D%94%E5%92%8C%E3%82%AD%E3%83%AA%E3%83%B3+OR+%E5%B0%8F%E9%87%8E%E8%96%AC%E5%93%81+OR+%E5%A1%A9%E9%87%8E%E7%BE%A9%E8%A3%BD%E8%96%AC%29+%28%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%AE%89%E5%85%A8%E6%80%A7%E7%AE%A1%E7%90%86+OR+PV%E6%88%A6%E7%95%A5%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 10
-    category: "domestic_authority"
-
-  - name: "厚労省・検疫所 感染症情報"
-    url: "https://news.google.com/rss/search?q=%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9+%28%E5%8E%9A%E7%94%9F%E5%8A%B4%E5%83%8D%E7%9C%81+OR+%E6%A4%9C%E7%96%AB%E6%89%80+OR+FORTH%29&hl=ja&gl=JP&ceid=JP:ja"
+    category: "company_strategy_jp"
+  
+  # ===== 外資製薬 PV戦略・組織動向 =====
+  
+  - name: "外資製薬 PV戦略"
+    url: "https://news.google.com/rss/search?q=%28%E3%83%95%E3%82%A1%E3%82%A4%E3%82%B6%E3%83%BC+OR+%E3%83%8E%E3%83%90%E3%83%AB%E3%83%86%E3%82%A3%E3%82%B9+OR+GSK+OR+MSD+OR+%E3%82%B5%E3%83%8E%E3%83%95%E3%82%A3+OR+%E3%82%A2%E3%82%B9%E3%83%88%E3%83%A9%E3%82%BC%E3%83%8D%E3%82%AB+OR+%E3%83%AD%E3%82%B7%E3%83%A5+OR+%E3%82%B8%E3%83%A7%E3%83%B3%E3%82%BD%E3%83%B3+OR+%E3%83%AA%E3%83%AA%E3%83%BC%29+%28%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%AE%89%E5%85%A8%E6%80%A7%E7%AE%A1%E7%90%86%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 9
-    category: "domestic_authority"
-
-  # ===== 日本語報道 =====
-
-  - name: "ハンタウイルス 日本語ニュース"
-    url: "https://news.google.com/rss/search?q=%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9&hl=ja&gl=JP&ceid=JP:ja"
+    category: "company_strategy_intl"
+  
+  # ===== コンサル業界動向 =====
+  
+  - name: "コンサル PV発信"
+    url: "https://news.google.com/rss/search?q=%28%E3%83%87%E3%83%AD%E3%82%A4%E3%83%88+OR+PwC+OR+%E3%82%A2%E3%82%AF%E3%82%BB%E3%83%B3%E3%83%81%E3%83%A5%E3%82%A2+OR+EY+OR+KPMG+OR+IQVIA+OR+%E3%83%9E%E3%83%83%E3%82%AD%E3%83%B3%E3%82%BC%E3%83%BC+OR+%E3%83%9C%E3%82%B9%E3%83%88%E3%83%B3%E3%82%B3%E3%83%B3%E3%82%B5%E3%83%AB%29+%28%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%AE%89%E5%85%A8%E6%80%A7%E7%AE%A1%E7%90%86+OR+%E5%8C%BB%E8%96%AC%E5%93%81AI%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 9
-    category: "ja_news"
-
-  - name: "ハンタウイルス肺症候群 日本語"
-    url: "https://news.google.com/rss/search?q=%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9%E8%82%BA%E7%97%87%E5%80%99%E7%BE%A4&hl=ja&gl=JP&ceid=JP:ja"
+    category: "consulting_jp"
+  
+  # ===== 規制制度・ガイダンス(日本) =====
+  
+  - name: "PMDA ガイドライン・通知"
+    url: "https://news.google.com/rss/search?q=PMDA+%28%E3%82%AC%E3%82%A4%E3%83%89%E3%83%A9%E3%82%A4%E3%83%B3+OR+%E9%80%9A%E7%9F%A5+OR+%E7%99%BA%E5%87%BA+OR+%E3%83%91%E3%83%96%E3%82%B3%E3%83%A1%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 9
-    category: "ja_news"
-
-  - name: "クルーズ船 ハンタウイルス"
-    url: "https://news.google.com/rss/search?q=%E3%82%AF%E3%83%AB%E3%83%BC%E3%82%BA%E8%88%B9+%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9&hl=ja&gl=JP&ceid=JP:ja"
+    category: "regulatory_jp"
+  
+  - name: "GVP省令・薬機法改正"
+    url: "https://news.google.com/rss/search?q=GVP%E7%9C%81%E4%BB%A4+OR+%E8%96%AC%E6%A9%9F%E6%B3%95+%E6%94%B9%E6%AD%A3+OR+%E5%AE%89%E5%85%A8%E7%AE%A1%E7%90%86%E5%9F%BA%E6%BA%96&hl=ja&gl=JP&ceid=JP:ja"
     weight: 10
-    category: "ja_news"
-
-  - name: "腎症候性出血熱 HFRS"
-    url: "https://news.google.com/rss/search?q=%E8%85%8E%E7%97%87%E5%80%99%E7%BE%A4%E6%80%A7%E5%87%BA%E8%A1%80%E7%86%B1+OR+HFRS&hl=ja&gl=JP&ceid=JP:ja"
-    weight: 8
-    category: "ja_news"
-
-  # ===== 国際機関(日本語報道) =====
-
-  - name: "WHO ハンタウイルス"
-    url: "https://news.google.com/rss/search?q=WHO+%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9&hl=ja&gl=JP&ceid=JP:ja"
+    category: "regulatory_jp"
+  
+  - name: "ICH ガイドライン"
+    url: "https://news.google.com/rss/search?q=%28ICH+E2B+OR+ICH+E2C+OR+ICH+E2D+OR+ICH+E2E%29+%28%E5%8C%BB%E8%96%AC%E5%93%81+OR+%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%AE%89%E5%85%A8%E6%80%A7%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 9
-    category: "international_ja"
-
-  - name: "ECDC ハンタウイルス"
-    url: "https://news.google.com/rss/search?q=ECDC+%E3%83%8F%E3%83%B3%E3%82%BF%E3%82%A6%E3%82%A4%E3%83%AB%E3%82%B9&hl=ja&gl=JP&ceid=JP:ja"
+    category: "regulatory_jp"
+  
+  - name: "リスク管理計画 PSUR"
+    url: "https://news.google.com/rss/search?q=%28%E3%83%AA%E3%82%B9%E3%82%AF%E7%AE%A1%E7%90%86%E8%A8%88%E7%94%BB+OR+%E5%AE%9A%E6%9C%9F%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E6%9C%80%E6%96%B0%E5%A0%B1%E5%91%8A%29+%28%E5%8C%BB%E8%96%AC%E5%93%81+OR+%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 9
+    category: "regulatory_jp"
+  
+  # ===== AI/DX 活用(PV専業: 複合キーワード) =====
+  
+  - name: "PV AI(専業)"
+    url: "https://news.google.com/rss/search?q=%28%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E5%89%AF%E4%BD%9C%E7%94%A8%E7%9B%A3%E8%A6%96+OR+%E5%80%8B%E5%88%A5%E7%97%87%E4%BE%8B%E5%A0%B1%E5%91%8A+OR+%E5%8C%BB%E8%96%AC%E5%93%81%E5%AE%89%E5%85%A8%E6%80%A7+OR+%E3%82%B7%E3%82%B0%E3%83%8A%E3%83%AB%E6%A4%9C%E5%87%BA%29+%28AI+OR+%E7%94%9F%E6%88%90AI+OR+LLM+OR+%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 10
+    category: "pv_ai_jp"
+  
+  - name: "ICSR 自動化"
+    url: "https://news.google.com/rss/search?q=%28%E5%80%8B%E5%88%A5%E7%97%87%E4%BE%8B%E5%A0%B1%E5%91%8A+OR+ICSR%29+%28AI+OR+%E8%87%AA%E5%8B%95%E5%8C%96+OR+%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 9
+    category: "pv_ai_jp"
+  
+  - name: "製薬 AI 活用"
+    url: "https://news.google.com/rss/search?q=%E8%A3%BD%E8%96%AC+%28%E7%94%9F%E6%88%90AI+OR+LLM%29+%28%E5%AE%89%E5%85%A8%E6%80%A7+OR+%E5%89%AF%E4%BD%9C%E7%94%A8+OR+%E5%93%81%E8%B3%AA%29&hl=ja&gl=JP&ceid=JP:ja"
     weight: 8
-    category: "international_ja"
-
+    category: "pv_ai_jp"
+  
+ 
+  # ===== 中国 PV 動向 =====
+  
+  - name: "中国 NMPA PV"
+    url: "https://news.google.com/rss/search?q=NMPA+%28%E5%AE%89%E5%85%A8%E6%80%A7+OR+%E3%82%AC%E3%82%A4%E3%83%89%E3%83%A9%E3%82%A4%E3%83%B3+OR+%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 9
+    category: "china_pv"
+  
+  - name: "中国 医薬品規制"
+    url: "https://news.google.com/rss/search?q=%E4%B8%AD%E5%9B%BD+%28%E5%8C%BB%E8%96%AC%E5%93%81%E8%A6%8F%E5%88%B6+OR+GVP+OR+%E5%89%AF%E4%BD%9C%E7%94%A8%E7%9B%A3%E8%A6%96+OR+CDE%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 8
+    category: "china_pv"
+  
+  - name: "中国 製薬AI"
+    url: "https://news.google.com/rss/search?q=%E4%B8%AD%E5%9B%BD+%28%E8%A3%BD%E8%96%AC+AI+OR+%E5%8C%BB%E8%96%AC%E5%93%81+%E7%94%9F%E6%88%90AI+OR+%E3%82%A2%E3%83%AA%E3%83%90%E3%83%90+%E8%A3%BD%E8%96%AC+OR+%E3%83%86%E3%83%B3%E3%82%BB%E3%83%B3%E3%83%88+%E8%A3%BD%E8%96%AC%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 8
+    category: "china_pv"
+  
+  - name: "中国製薬 海外進出"
+    url: "https://news.google.com/rss/search?q=%E4%B8%AD%E5%9B%BD%E8%A3%BD%E8%96%AC+%28%E6%B5%B7%E5%A4%96%E9%80%B2%E5%87%BA+OR+%E3%82%B0%E3%83%AD%E3%83%BC%E3%83%90%E3%83%AB+OR+%E5%AE%89%E5%85%A8%E6%80%A7%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 7
+    category: "china_pv"
+  
+  # ===== 海外規制(日本語報道) =====
+  
+  - name: "FDA AI ガイダンス"
+    url: "https://news.google.com/rss/search?q=FDA+%28AI+%E3%82%AC%E3%82%A4%E3%83%80%E3%83%B3%E3%82%B9+OR+%E7%94%9F%E6%88%90AI+OR+%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 9
+    category: "regulatory_intl_jp"
+  
+  - name: "EMA GVP"
+    url: "https://news.google.com/rss/search?q=EMA+%28GVP+OR+%E3%83%95%E3%82%A1%E3%83%BC%E3%83%9E%E3%82%B3%E3%83%93%E3%82%B8%E3%83%A9%E3%83%B3%E3%82%B9+OR+%E3%82%AC%E3%82%A4%E3%83%80%E3%83%B3%E3%82%B9%29&hl=ja&gl=JP&ceid=JP:ja"
+    weight: 8
+    category: "regulatory_intl_jp"
+  
   # ===== 英語ソース(フォールバック) =====
-
-  - name: "Hantavirus EN news"
-    url: "https://news.google.com/rss/search?q=hantavirus+OR+%22hantavirus+pulmonary+syndrome%22+OR+HPS&hl=en-US&gl=US&ceid=US:en"
-    weight: 7
-    category: "intl_en"
-
-  - name: "WHO Disease Outbreak News (EN)"
-    url: "https://www.who.int/feeds/entity/csr/don/en/rss.xml"
-    weight: 7
-    category: "intl_en"
+  
+  - name: "FDA Guidance (EN)"
+    url: "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/guidance-recently-issued-search/rss.xml"
+    weight: 6
+    category: "regulatory_en"
+  
+  - name: "EMA News (EN)"
+    url: "https://www.ema.europa.eu/en/rss.xml"
+    weight: 5
+    category: "regulatory_en"
