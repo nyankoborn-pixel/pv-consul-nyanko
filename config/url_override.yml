@@ -2,7 +2,7 @@
 # enabled: true の状態で workflow を実行すると、このURL/記事内容で1回だけ投稿し、
 # 投稿成功後に main.py が自動的に enabled: false に書き換えてコミットする。
 # RSS 収集・スコアリング・PV関連性判定はすべてスキップされる。
-enabled: true
+enabled: false
 url: "https://id-info.jihs.go.jp/risk-assessment/hantavirus-pulmonary-syndrome/20260506/index.html"
 title: "国外航行中のクルーズ船におけるハンタウイルス感染症事例について"
 source_name: "JIHS リスク評価"
