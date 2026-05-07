@@ -17,13 +17,15 @@ WHITELIST = {
     # 一般カテゴリ用語(原文になくても使ってよい)
     "PV", "AI", "ICH", "GxP", "GVP", "GCP", "GLP", "GMP",
     "DX", "IT", "API",
-    # 規制当局名(一般常識として使用可)
+    # 規制当局・公衆衛生機関(一般常識として使用可)
     "FDA", "EMA", "PMDA", "MHRA", "WHO", "CIOMS", "NMPA", "CDE",
+    "ECDC", "CDC", "PAHO", "JIHS", "FORTH",
     # キャラ関連
     "コンサルにゃんこ",
     # ハッシュタグ用英字(generate.pyで付与するため)
     "Pharmacovigilance", "DrugSafety", "PharmaAI", "AIinPharma",
     "RegulatoryAffairs", "SignalDetection",
+    "PublicHealth", "Outbreak", "DiseaseOutbreakNews",
 }
 
 

@@ -1,309 +1,121 @@
-# 話題性スコアリング用キーワード重み
-# タイトル+要約内の出現をチェック(大文字小文字無視)
-# マイナス重みは「除外」を意味する
-# 略語(RMP, PSUR等)は他領域と衝突するため、単独では加点しない
+# 【一時切替: 2026/5/7-5/13 ハンタウイルス特集】
+# 通常の PV キーワード構成は pre-hantavirus-2026-05-07 タグに退避済み。
+# 2026/5/14 以降に REVERT_NOTES.md の手順で復元する。
 
 high_impact:
-  # ===== カテゴリ1: 製薬企業のPV戦略・組織動向 =====
-  
-  # 日本大手
-  - keyword: "武田薬品"
-    weight: 5
-  - keyword: "アステラス"
-    weight: 5
-  - keyword: "第一三共"
-    weight: 5
-  - keyword: "中外製薬"
-    weight: 5
-  - keyword: "エーザイ"
-    weight: 5
-  - keyword: "大塚製薬"
-    weight: 5
-  - keyword: "協和キリン"
-    weight: 5
-  - keyword: "小野薬品"
-    weight: 5
-  - keyword: "塩野義製薬"
-    weight: 5
-  - keyword: "参天製薬"
-    weight: 5
-  - keyword: "日本新薬"
-    weight: 4
-  - keyword: "持田製薬"
-    weight: 4
-  - keyword: "大正製薬"
-    weight: 4
-  - keyword: "ツムラ"
-    weight: 4
-  
-  # 外資大手
-  - keyword: "ファイザー"
-    weight: 5
-  - keyword: "ノバルティス"
-    weight: 5
-  - keyword: "GSK"
-    weight: 5
-  - keyword: "サノフィ"
-    weight: 5
-  - keyword: "アストラゼネカ"
-    weight: 5
-  - keyword: "ロシュ"
-    weight: 5
-  - keyword: "MSD"
-    weight: 5
-  - keyword: "ジョンソン"
-    weight: 4
-  - keyword: "イーライリリー"
-    weight: 5
-  
-  # PV戦略を示す語(企業名と組み合わさってヒット想定)
-  - keyword: "PV戦略"
+  # ===== ハンタウイルス本体 =====
+  - keyword: "ハンタウイルス"
+    weight: 12
+  - keyword: "hantavirus"
+    weight: 12
+  - keyword: "ハンタウイルス肺症候群"
+    weight: 12
+  - keyword: "hantavirus pulmonary syndrome"
+    weight: 12
+  - keyword: "HPS"
     weight: 8
-  - keyword: "PV組織"
-    weight: 8
-  - keyword: "安全性管理"
-    weight: 7
-  - keyword: "ファーマコビジランス"
-    weight: 7
-  - keyword: "医薬品安全性監視"
-    weight: 8
-  
-  # ===== カテゴリ2: コンサル業界動向 =====
-  
-  - keyword: "デロイト"
-    weight: 6
-  - keyword: "Deloitte"
-    weight: 6
-  - keyword: "PwC"
-    weight: 6
-  - keyword: "アクセンチュア"
-    weight: 6
-  - keyword: "Accenture"
-    weight: 6
-  - keyword: "EY"
-    weight: 5
-  - keyword: "KPMG"
-    weight: 5
-  - keyword: "IQVIA"
-    weight: 7
-  - keyword: "マッキンゼー"
-    weight: 6
-  - keyword: "McKinsey"
-    weight: 6
-  - keyword: "ボストンコンサルティング"
-    weight: 6
-  - keyword: "BCG"
-    weight: 6
-  
-  # ===== カテゴリ3: 規制制度・ガイダンス =====
-  # 注: RMP, PSUR等の略語は単独では加点しない(他領域との衝突防止)
-  # フルスペルでのみ加点する
-  
-  - keyword: "GVP省令"
+  - keyword: "腎症候性出血熱"
     weight: 10
-  - keyword: "薬機法 改正"
-    weight: 10
-  - keyword: "医薬品医療機器法"
+  - keyword: "HFRS"
+    weight: 8
+  - keyword: "オルソハンタウイルス"
     weight: 9
-  - keyword: "PMDA"
+
+  # ===== 関連症状・病原体特性 =====
+  - keyword: "肺症候群"
+    weight: 6
+  - keyword: "出血熱"
+    weight: 6
+  - keyword: "げっ歯類"
+    weight: 5
+  - keyword: "シカネズミ"
+    weight: 6
+  - keyword: "アンデスウイルス"
     weight: 7
+  - keyword: "シンノンブレウイルス"
+    weight: 7
+
+  # ===== 今回の集団発生関連 =====
+  - keyword: "クルーズ船"
+    weight: 8
+  - keyword: "南大西洋"
+    weight: 5
+  - keyword: "南極圏"
+    weight: 4
+  - keyword: "カナリア諸島"
+    weight: 5
+  - keyword: "アフリカ沖"
+    weight: 4
+
+  # ===== 規制・行政 =====
+  - keyword: "JIHS"
+    weight: 9
+  - keyword: "国立健康危機管理研究機構"
+    weight: 9
   - keyword: "厚生労働省"
     weight: 6
-  - keyword: "ガイドライン"
+  - keyword: "検疫所"
+    weight: 7
+  - keyword: "FORTH"
+    weight: 7
+  - keyword: "リスク評価"
+    weight: 7
+  - keyword: "感染症リスク"
+    weight: 7
+  - keyword: "渡航感染症"
+    weight: 7
+
+  # ===== 国際機関 =====
+  - keyword: "WHO"
+    weight: 7
+  - keyword: "ECDC"
+    weight: 7
+  - keyword: "PAHO"
+    weight: 6
+  - keyword: "CDC"
+    weight: 6
+  - keyword: "Disease Outbreak News"
+    weight: 7
+
+  # ===== 関連用語(感染症一般) =====
+  - keyword: "集団発生"
+    weight: 6
+  - keyword: "アウトブレイク"
+    weight: 6
+  - keyword: "outbreak"
     weight: 5
-  - keyword: "ガイダンス"
+  - keyword: "ヒト-ヒト感染"
+    weight: 6
+  - keyword: "致死率"
     weight: 5
-  - keyword: "通知"
+  - keyword: "確定例"
+    weight: 5
+  - keyword: "疑い例"
     weight: 4
-  - keyword: "通達"
-    weight: 5
-  - keyword: "発出"
-    weight: 5
-  - keyword: "パブリックコメント"
-    weight: 6
-  - keyword: "パブコメ"
-    weight: 6
-  - keyword: "ICH E2B"
-    weight: 10
-  - keyword: "ICH E2C"
-    weight: 9
-  - keyword: "ICH E2D"
-    weight: 9
-  - keyword: "ICH E2E"
-    weight: 9
-  - keyword: "ICH ガイドライン"
-    weight: 8
-  - keyword: "リスク管理計画"
-    weight: 9
-  - keyword: "定期的安全性最新報告"
-    weight: 9
-  - keyword: "製造販売後調査"
-    weight: 7
-  - keyword: "市販後調査"
-    weight: 7
-  - keyword: "再評価"
-    weight: 5
-  - keyword: "再審査"
-    weight: 5
-  - keyword: "シグナル検出"
-    weight: 8
-  - keyword: "個別症例報告"
-    weight: 8
-  - keyword: "ICSR"
-    weight: 7
-  
-  # ===== カテゴリ4: AI/DX 活用 =====
-  # 注: AI単独は重み下げ、PV関連語との複合でしか上位に来ないように
-  
-  - keyword: "生成AI"
-    weight: 6
-  - keyword: "LLM"
-    weight: 6
-  - keyword: "大規模言語モデル"
-    weight: 7
-  - keyword: "機械学習"
-    weight: 5
-  - keyword: "ディープラーニング"
-    weight: 5
-  - keyword: "AIガードレール"
-    weight: 7
-  - keyword: "AIガバナンス"
-    weight: 7
-  - keyword: "AI倫理"
-    weight: 6
-  - keyword: "自動化"
-    weight: 4
-  - keyword: "DX"
-    weight: 4
-  - keyword: "デジタルトランスフォーメーション"
-    weight: 4
-  - keyword: "RPA"
-    weight: 5
-  - keyword: "製薬DX"
-    weight: 8
-  - keyword: "医薬品AI"
-    weight: 9
-  
-  # 英語キーワード(PV特化)
-  - keyword: "AI in pharmacovigilance"
-    weight: 10
-  - keyword: "pharmacovigilance"
-    weight: 7
-  - keyword: "drug safety"
-    weight: 7
-  - keyword: "case processing"
-    weight: 6
-  - keyword: "signal management"
-    weight: 7
-  - keyword: "signal detection"
-    weight: 7
-  - keyword: "adverse event reporting"
-    weight: 7
-  - keyword: "AI governance"
-    weight: 5
-  - keyword: "AI guardrail"
-    weight: 5
-  - keyword: "machine learning"
-    weight: 4
-  - keyword: "generative AI"
-    weight: 5
-  - keyword: "artificial intelligence"
-    weight: 4
-  
-  # ===== カテゴリ5: 中国 PV 動向 =====
-  
-  - keyword: "NMPA"
-    weight: 9
-  - keyword: "CDE"
-    weight: 6
-  - keyword: "中国 医薬品規制"
-    weight: 8
-  - keyword: "中国 GVP"
-    weight: 9
-  - keyword: "中国 ファーマコビジランス"
-    weight: 9
-  - keyword: "中国 副作用監視"
-    weight: 8
-  - keyword: "中国 製薬AI"
-    weight: 8
-  - keyword: "中国 生成AI 医薬品"
-    weight: 8
-  - keyword: "アリババ 製薬"
-    weight: 7
-  - keyword: "テンセント 製薬"
-    weight: 7
-  - keyword: "Baidu 製薬"
-    weight: 7
-  - keyword: "中国製薬 海外進出"
-    weight: 7
-  - keyword: "中国製薬 グローバル"
-    weight: 7
-  
-  # ===== カテゴリ6: システム・ベンダー =====
-  
-  - keyword: "Argus"
-    weight: 7
-  - keyword: "Oracle Argus"
-    weight: 7
-  - keyword: "ArisGlobal"
-    weight: 6
-  - keyword: "LifeSphere"
-    weight: 6
-  - keyword: "Veeva"
-    weight: 6
-  - keyword: "Veeva Vault"
-    weight: 7
-  - keyword: "21 CFR Part 11"
-    weight: 5
-  - keyword: "Annex 11"
-    weight: 5
-  
-  # ===== 除外キーワード(マイナス重み) =====
-  
-  # 個別品目の改訂・回収系
+
+  # ===== 除外キーワード(マイナス重み)=====
+  # 個別品目情報(医薬品の使用上の注意改訂等)は通常PVと同様に除外
   - keyword: "使用上の注意の改訂"
-    weight: -100
-  - keyword: "使用上の注意改訂"
     weight: -100
   - keyword: "添付文書改訂"
     weight: -100
-  - keyword: "添付文書の改訂"
-    weight: -100
-  - keyword: "重大な副作用追加"
-    weight: -100
-  - keyword: "重大な副作用 追加"
-    weight: -100
-  - keyword: "副作用追加"
-    weight: -80
   - keyword: "自主回収"
-    weight: -100
-  - keyword: "クラスI回収"
-    weight: -100
-  - keyword: "クラスII回収"
-    weight: -100
-  - keyword: "クラスIII回収"
     weight: -100
   - keyword: "出荷停止"
     weight: -100
-  - keyword: "販売中止"
-    weight: -100
-  - keyword: "供給停止"
-    weight: -80
-  - keyword: "回収命令"
-    weight: -100
-  - keyword: "緊急安全性情報"
-    weight: -50
-  
-  # PV以外領域での誤マッチ防止
+
+  # 同名・誤マッチ防止
   - keyword: "Reviews of Modern Physics"
     weight: -100
   - keyword: "二次元磁性"
     weight: -100
-  - keyword: "磁性研究"
-    weight: -100
-  - keyword: "物性研究"
-    weight: -50
-  - keyword: "物理学"
-    weight: -50
   - keyword: "F5 AI Guardrails"
     weight: -50
+
+  # ハンタウイルスとは別の感染症で、テーマがブレる可能性のあるもの
+  - keyword: "新型コロナ"
+    weight: -30
+  - keyword: "インフルエンザ"
+    weight: -30
+  - keyword: "麻疹"
+    weight: -20

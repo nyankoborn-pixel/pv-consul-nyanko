@@ -1,4 +1,7 @@
 # コンサルにゃんこ キャラクター設定
+# 【一時切替: 2026/5/7-5/13 ハンタウイルス特集】
+# always ハッシュタグを感染症向けに変更。
+# 2026/5/14 以降に REVERT_NOTES.md の手順で復元する。
 character:
   name: "コンサルにゃんこ"
   name_en: "Consul Nyanko"
@@ -20,19 +23,20 @@ character:
     - "特定企業・製品への攻撃的な批判"
     - "医療アドバイス(服用すべき・中止すべき等)"
     - "投資・株価への誘導"
+    - "不安を煽る表現(「危険」「パンデミック」断定など)"
   signature_emoji: "🐾"
 
-# ハッシュタグ候補(英語)
+# ハッシュタグ候補(英語/日本語)
 hashtags:
   always:
-    - "#Pharmacovigilance"
-    - "#DrugSafety"
+    - "#ハンタウイルス"
+    - "#感染症"
   conditional:
-    ai: ["#AIinPharma", "#PharmaAI"]
-    regulatory: ["#RegulatoryAffairs", "#FDA", "#EMA"]
-    signal: ["#SignalDetection"]
-    icsr: ["#ICSR"]
-    pmda: ["#PMDA"]
+    ai: ["#PublicHealth"]
+    regulatory: ["#WHO", "#ECDC"]
+    signal: ["#Outbreak"]
+    icsr: ["#DiseaseOutbreakNews"]
+    pmda: ["#JIHS"]
 
 # 文字数上限(Xの仕様 = 280字)
 max_chars: 278
