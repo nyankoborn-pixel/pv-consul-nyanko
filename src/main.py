@@ -26,9 +26,7 @@ from generate import (
 from validate import validate_post
 from post_x import post_to_x, post_reply
 from filter_restricted import is_member_only_article
-
-
-POSTED_LOG = Path("logs/posted.jsonl")
+from paths import POSTED_LOG, ACCOUNT_NAME
 MAX_RETRIES = 15  # PV無関係・画像失敗等のスキップ余地を確保
 REPLY_DELAY_SEC = 5
 
@@ -52,7 +50,7 @@ def try_generate_and_validate(entry: dict, character: dict) -> dict:
 
 
 def run(dry_run: bool = False) -> int:
-    print(f"=== コンサルにゃんこ PVポスト実行 {datetime.now(timezone.utc).isoformat()} ===")
+    print(f"=== Auto post [{ACCOUNT_NAME}] {datetime.now(timezone.utc).isoformat()} ===")
 
     character = load_character()
 

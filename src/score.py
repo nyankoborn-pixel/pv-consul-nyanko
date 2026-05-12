@@ -13,12 +13,12 @@ from pathlib import Path
 
 from dateutil import parser as date_parser
 
-POSTED_LOG = Path("logs/posted.jsonl")
+from paths import POSTED_LOG, KEYWORDS_YML
 
 MIN_SUMMARY_LENGTH = 100
 
 
-def load_keywords(config_path: str = "config/keywords.yml") -> list:
+def load_keywords(config_path: str = KEYWORDS_YML) -> list:
     with open(config_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data.get("high_impact", [])
@@ -82,7 +82,7 @@ def is_summary_too_short(entry: dict) -> bool:
     return len(combined) < MIN_SUMMARY_LENGTH
 
 
-def score_entries(entries: list, config_path: str = "config/keywords.yml") -> list:
+def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
     keywords = load_keywords(config_path)
     posted_links = load_posted_links()
 

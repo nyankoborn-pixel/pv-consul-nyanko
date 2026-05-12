@@ -15,6 +15,8 @@ from google import genai
 from google.genai import types
 from PIL import Image, ImageDraw, ImageFont
 
+from paths import CHARACTER_YML
+
 
 # ============================================================
 # Pillow 描画設定
@@ -41,7 +43,7 @@ NOTO_FONT_PATHS = [
 # ============================================================
 # 設定読み込み
 # ============================================================
-def load_character(config_path: str = "config/character.yml") -> dict:
+def load_character(config_path: str = CHARACTER_YML) -> dict:
     with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
@@ -88,72 +90,73 @@ def _get_client() -> genai.Client:
 # ============================================================
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
+    pc = character.get("prompt_config", {})
+
+    domain_label = pc.get("domain_label", "PV(医薬品安全性監視)/医薬品/製薬業界")
+    related_examples = pc.get("domain_related_examples", [])
+    unrelated_examples = pc.get("domain_unrelated_examples", [])
+    detection_keywords = pc.get("domain_detection_keywords", [])
+    summary_audience = pc.get("summary_audience", "PV コンサル、製薬企業の安全性管理担当、規制当局関係者")
+    acronym_rule = pc.get("acronym_rule",
+                          "原文に明記されていない略語はフルスペルまたは一般用語で記述すること")
+
+    related_block = "\n".join(f"- {x}" for x in related_examples) or "- (定義なし)"
+    unrelated_block = "\n".join(f"- {x}" for x in unrelated_examples) or "- (定義なし)"
+    detection_kw_block = ", ".join(f"「{k}」" for k in detection_keywords)
 
     prompt = f"""あなたは「{char['name']}」というキャラクターです。
-PVニュースのXポスト用に、読者の手を止める日本語要約と、
-ニュースの本質を切り取る 5-7-5 俳句を生成してください。
+このアカウントは「{domain_label}」関連ニュースを発信する X アカウントです。
+ニュースの読者の手を止める日本語要約と、本質を切り取る 5-7-5 俳句を生成してください。
 
 【キャラクター設定】
 - 名前: {char['name']}
 - 性格: {", ".join(char['personality'])}
-- スタイル: 静かに本質を見抜くPVコンサルの視点。データと業界知見で語る
+- スタイル: 静かに本質を見抜く視点。データと業界知見で語る
 
 【最初の判定 - 極めて重要】
-このニュースが「PV(医薬品安全性監視)/医薬品/製薬業界」と
-直接関係あるかを判定してください。
+このニュースが「{domain_label}」と直接関係あるかを判定してください。
 
-PVに関係ある例:
-- 医薬品の安全性管理、副作用監視、ICSR、シグナル検出
-- 製薬企業の戦略、組織変更、AI/DX導入
-- 規制制度(GVP省令、ICH ガイドライン、PMDA/FDA/EMA の発出)
-- 医薬品AI、製薬AI、医療AIの中で薬と関わるもの
+関係ある例:
+{related_block}
 
-PVに関係ない例:
-- 一般的なIT企業のAIガバナンス
-- 物理学・化学の研究
-- 医療機関(病院)の運営の話で薬と無関係
-- 食品、化粧品、サプリメント
-- 一般的なAI規制の話で医薬品と無関係
+関係ない例:
+{unrelated_block}
 
 判定方法:
-- 原文に「医薬品」「製薬」「PV」「ファーマコビジランス」「副作用」
-  「ICSR」「シグナル検出」「FDA/EMA/PMDA」のいずれか、または
-  製薬企業名・医薬品関連の固有名詞が明示されている → "yes"
-- 原文に上記がなく、強引にPVに寄せないと書けない → "no"
+- 原文に {detection_kw_block} のいずれか、または該当領域の固有名詞が明示されている → "yes"
+- 原文に上記がなく、強引にドメインに寄せないと書けない → "no"
 
 【出力形式】
-PVに関係ない場合(is_pv_related=false):
+ドメインに関係ない場合:
 {{
-  "is_pv_related": false,
-  "skip_reason": "なぜPVと無関係と判断したか短く記載"
+  "is_in_domain": false,
+  "skip_reason": "なぜ無関係と判断したか短く記載"
 }}
 
-PVに関係ある場合(is_pv_related=true):
+ドメインに関係ある場合:
 {{
-  "is_pv_related": true,
+  "is_in_domain": true,
   "summary": "120-180字、フックのある日本語要約",
   "haiku": ["上句", "中句", "下句"]
 }}
 
 【summary 設計指針(is_pv_related=true の時のみ)- 極めて重要】
-読者(PVコンサル、製薬企業の安全性管理担当、規制当局関係者)の手を
-タイムライン上で止めることを最優先する。
+読者({summary_audience})の手をタイムライン上で止めることを最優先する。
 
 書き方:
 1. 冒頭1文目で「なぜこのニュースが面白いか」を提示する。
-   役所主語(「○○省は」「PMDAは」)で始めない。
-   ニュースの主役(薬、技術、企業、トレンド)を主語にする。
+   役所主語(「○○省は」「PMDAは」等)で始めない。
+   ニュースの主役(技術、企業、トレンド)を主語にする。
 2. 数値・日付・固有名詞は原文に明記されている範囲で自由に使ってよい。
-   原文がPV略語(ICSR/PSUR/RMP/PBRER等)に言及していなければ、
-   フルスペルまたは一般用語で記述すること。
-3. 末尾の汎用的な締め(「医療従事者は確認すべき」「動向を注視」等)は禁止。
+   {acronym_rule}
+3. 末尾の汎用的な締め(「動向を注視」「今後に期待」等)は禁止。
 4. 文末は「〜とのこと」「〜と報告されている」「〜と発表された」など。
 
 【極めて重要な制約 - ハルシネーション防止】
 summary には、原文に明示的に書かれている事実だけを記述すること。
 以下を絶対に書かないこと:
 - 原文に書かれていない「業界の見立て」「構造分析」「推測」「示唆」
-- 原文に書かれていない他の制度・施策との「連動」「影響」「波及」
+- 原文に書かれていない他の事象との「連動」「影響」「波及」
 - 原文に書かれていない「変化の可能性」「求められる対応」「今後の展開」
 - 「示唆されている」「可能性がある」「求められる」「見られる」など
   推測を匂わせる表現で、原文にない内容を補完すること
@@ -163,9 +166,9 @@ summary には、原文に明示的に書かれている事実だけを記述す
 要約が短くなる場合はそれでよい。
 
 【厳守】
-- 原文が医薬品/PVと無関係なら、無理に医薬品の話に寄せず
-  is_pv_related=false で返すこと。これが最も重要。
-- 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」など)は禁止。
+- 原文がドメインと無関係なら、無理に寄せず is_in_domain=false で返すこと。
+- 投資・株価への直接的な誘導は禁止。
+- 個別の医療行為アドバイス(「服用すべき」「投与中止」等)は禁止。
 
 【haiku 設計指針】
 - 3行 (上句 / 中句 / 下句) の俳句で記事本質を切り取る
@@ -179,7 +182,7 @@ summary には、原文に明示的に書かれている事実だけを記述す
 要約: {entry['summary'][:1500]}
 ソース: {entry['source_name']}
 
-最初に is_pv_related の判定をしてから、JSON形式で出力してください。
+最初に is_in_domain の判定をしてから、JSON形式で出力してください。
 前後に説明文を付けないこと。
 """
     return prompt
@@ -209,8 +212,10 @@ def generate_post_content(entry: dict, character: dict) -> dict:
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Failed to parse Gemini JSON output: {e}\nRaw: {text}")
 
-    if result.get("is_pv_related") is False:
-        skip_reason = result.get("skip_reason", "PVと無関係と判定")
+    # 旧キー is_pv_related も互換のため受け付ける
+    in_domain = result.get("is_in_domain", result.get("is_pv_related"))
+    if in_domain is False:
+        skip_reason = result.get("skip_reason", "ドメイン外と判定")
         raise PVNotRelatedError(f"Skipped: {skip_reason}")
 
     if "summary" not in result or "haiku" not in result:
@@ -238,19 +243,22 @@ def select_hashtags(entry: dict, character: dict) -> list:
     hashtags_config = character["hashtags"]
     tags = list(hashtags_config["always"])
 
-    matched_lower = [kw.lower() for kw in entry.get("matched_keywords", [])]
-    text = f"{entry['title']} {entry['summary']}".lower()
+    search_text = " ".join([
+        entry.get("title", ""),
+        entry.get("summary", ""),
+        entry.get("source_name", ""),
+    ]).lower()
 
-    if any(x in text for x in ["ai", "artificial intelligence", "machine learning", "llm"]):
-        tags.extend(hashtags_config["conditional"]["ai"][:1])
-    if any(x in matched_lower for x in ["guidance", "guideline", "fda approval", "ema approval", "ich"]):
-        tags.extend(hashtags_config["conditional"]["regulatory"][:1])
-    if "signal" in text:
-        tags.extend(hashtags_config["conditional"]["signal"][:1])
-    if "icsr" in text:
-        tags.extend(hashtags_config["conditional"]["icsr"][:1])
-    if "pmda" in entry["source_name"].lower() or "pmda" in text:
-        tags.extend(hashtags_config["conditional"]["pmda"][:1])
+    for rule in hashtags_config.get("conditional", []) or []:
+        if not isinstance(rule, dict):
+            continue
+        triggers = [str(t).lower() for t in rule.get("triggers", [])]
+        if not triggers:
+            continue
+        if any(t in search_text for t in triggers):
+            rule_tags = rule.get("tags", [])
+            if rule_tags:
+                tags.append(rule_tags[0])
 
     seen = set()
     unique_tags = []
