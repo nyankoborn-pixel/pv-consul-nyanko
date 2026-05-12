@@ -1,0 +1,10 @@
+# 会員専用記事の除外設定 (AI アカウント)
+
+restricted_domains:
+  - nikkei.com         # 日経電子版
+  - businessinsider.jp # Business Insider Japan
+  - forbesjapan.com    # Forbes Japan
+  - wsj.com            # WSJ
+  - bloomberg.co.jp    # Bloomberg
+
+min_summary_length: 350

@@ -1,0 +1,120 @@
+# AI 時事ニュース スコアリング用キーワード重み
+
+high_impact:
+  # ===== 主要 AI ラボ =====
+  - keyword: "OpenAI"
+    weight: 8
+  - keyword: "Anthropic"
+    weight: 8
+  - keyword: "Google DeepMind"
+    weight: 7
+  - keyword: "DeepMind"
+    weight: 7
+  - keyword: "xAI"
+    weight: 6
+  - keyword: "Meta AI"
+    weight: 6
+  - keyword: "Mistral"
+    weight: 6
+  - keyword: "Hugging Face"
+    weight: 6
+  - keyword: "Cohere"
+    weight: 5
+
+  # ===== モデル名 =====
+  - keyword: "GPT-5"
+    weight: 10
+  - keyword: "GPT-4"
+    weight: 7
+  - keyword: "Claude"
+    weight: 8
+  - keyword: "Gemini"
+    weight: 8
+  - keyword: "Llama"
+    weight: 6
+  - keyword: "DeepSeek"
+    weight: 6
+  - keyword: "Sora"
+    weight: 6
+
+  # ===== 技術概念 =====
+  - keyword: "生成AI"
+    weight: 7
+  - keyword: "LLM"
+    weight: 7
+  - keyword: "大規模言語モデル"
+    weight: 7
+  - keyword: "マルチモーダル"
+    weight: 6
+  - keyword: "推論モデル"
+    weight: 6
+  - keyword: "エージェント"
+    weight: 6
+  - keyword: "AI Agent"
+    weight: 6
+  - keyword: "RAG"
+    weight: 5
+  - keyword: "ファインチューニング"
+    weight: 5
+  - keyword: "事前学習"
+    weight: 5
+  - keyword: "オープンソース"
+    weight: 5
+  - keyword: "open-source"
+    weight: 5
+
+  # ===== ビジネス / 資金 =====
+  - keyword: "資金調達"
+    weight: 8
+  - keyword: "ユニコーン"
+    weight: 7
+  - keyword: "買収"
+    weight: 7
+  - keyword: "投資"
+    weight: 5
+  - keyword: "M&A"
+    weight: 6
+  - keyword: "IPO"
+    weight: 6
+  - keyword: "10億ドル"
+    weight: 6
+  - keyword: "100億ドル"
+    weight: 8
+  - keyword: "billion"
+    weight: 5
+
+  # ===== ハードウェア / インフラ =====
+  - keyword: "NVIDIA"
+    weight: 6
+  - keyword: "TPU"
+    weight: 5
+  - keyword: "GPU"
+    weight: 5
+  - keyword: "AIチップ"
+    weight: 6
+  - keyword: "アクセラレータ"
+    weight: 5
+  - keyword: "データセンター"
+    weight: 5
+
+  # ===== 規制 / 倫理 =====
+  - keyword: "AI Act"
+    weight: 7
+  - keyword: "EU AI Act"
+    weight: 8
+  - keyword: "大統領令"
+    weight: 6
+  - keyword: "AIガバナンス"
+    weight: 6
+  - keyword: "AI規制"
+    weight: 6
+  - keyword: "著作権"
+    weight: 5
+
+  # ===== 除外キーワード =====
+  - keyword: "占い"
+    weight: -50
+  - keyword: "スピリチュアル"
+    weight: -50
+  - keyword: "アイドル"
+    weight: -50

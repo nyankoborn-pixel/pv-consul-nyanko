@@ -19,11 +19,13 @@ import os
 import yaml
 from urllib.parse import urlparse
 
+from paths import RESTRICTED_DOMAINS_YML
+
 
 _CONFIG_CACHE = None
 
 
-def _load_config(config_path: str = "config/restricted_domains.yml") -> dict:
+def _load_config(config_path: str = RESTRICTED_DOMAINS_YML) -> dict:
     global _CONFIG_CACHE
     if _CONFIG_CACHE is not None:
         return _CONFIG_CACHE
@@ -71,7 +73,7 @@ def is_restricted_domain(url: str, config: dict = None) -> bool:
     return False
 
 
-def is_member_only_article(entry: dict, config_path: str = "config/restricted_domains.yml") -> bool:
+def is_member_only_article(entry: dict, config_path: str = RESTRICTED_DOMAINS_YML) -> bool:
     """
     記事が会員専用と推定されるか判定する。
 
