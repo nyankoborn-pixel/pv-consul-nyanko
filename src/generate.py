@@ -21,7 +21,10 @@ from PIL import Image, ImageDraw, ImageFont
 # ============================================================
 IMAGE_W = 1200
 IMAGE_H = 675
-STRIP_RATIO = 0.62  # 下部俳句帯の開始位置 (画像高さに対する比)
+STRIP_RATIO = 0.48  # 下部俳句帯の開始位置 (画像高さに対する比)
+HAIKU_FONT_SIZE = 70
+HAIKU_LINE_GAP = 16
+HAIKU_STROKE_WIDTH = 4
 
 NOTO_FONT_PATHS = [
     # Ubuntu (GitHub Actions runner) — apt: fonts-noto-cjk
@@ -386,7 +389,7 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont:
 
 
 def _compose_with_haiku(illust: Image.Image, haiku: list) -> Image.Image:
-    """イラストの下部にグラデーション帯を重ね、3行の俳句を白文字で配置。"""
+    """イラストの下部にグラデーション帯を重ね、3行の俳句を白文字+黒輪郭で配置。"""
     canvas = illust.copy()
     W, H = canvas.size
     strip_top = int(H * STRIP_RATIO)
@@ -394,19 +397,22 @@ def _compose_with_haiku(illust: Image.Image, haiku: list) -> Image.Image:
     layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     ld = ImageDraw.Draw(layer)
     for y in range(strip_top, H):
-        alpha = int(200 * ((y - strip_top) / (H - strip_top)))
+        alpha = int(210 * ((y - strip_top) / (H - strip_top)))
         ld.line([(0, y), (W, y)], fill=(8, 8, 12, alpha))
     canvas = Image.alpha_composite(canvas, layer)
 
     d = ImageDraw.Draw(canvas)
-    font = _load_font(42)
-    line_h = 56
-    total_h = line_h * 3
-    y0 = strip_top + ((H - strip_top) - total_h) // 2
+    font = _load_font(HAIKU_FONT_SIZE)
+    line_h = HAIKU_FONT_SIZE + HAIKU_LINE_GAP
+    block_h = line_h * 3 - HAIKU_LINE_GAP
+    y0 = strip_top + ((H - strip_top) - block_h) // 2
     for i, line in enumerate(haiku):
         tw = d.textlength(line, font=font)
-        d.text(((W - tw) // 2, y0 + i * line_h), line,
-               fill=(252, 248, 232, 255), font=font)
+        d.text(
+            ((W - tw) // 2, y0 + i * line_h), line,
+            fill=(252, 248, 232, 255), font=font,
+            stroke_width=HAIKU_STROKE_WIDTH, stroke_fill=(0, 0, 0, 255),
+        )
     return canvas
 
 
