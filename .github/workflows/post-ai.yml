@@ -3,9 +3,10 @@ name: AI News Auto Post (ai)
 on:
   schedule:
     # nyanko と同じ朝/昼/夜のタイミング (UTC 指定)
-    - cron: '0 23 * * *'   # 朝 08:00 JST (前日 UTC)
-    - cron: '30 3 * * *'   # 昼 12:30 JST
-    - cron: '0 12 * * *'   # 夜 21:00 JST
+    # ※ GitHub Actions の :00/:30 ホットアワー回避のため :07 / :37 にずらしている
+    - cron: '7 23 * * *'    # 朝 08:07 JST (前日 UTC)
+    - cron: '37 3 * * *'    # 昼 12:37 JST
+    - cron: '7 12 * * *'    # 夜 21:07 JST
   workflow_dispatch:
     inputs:
       dry_run:
