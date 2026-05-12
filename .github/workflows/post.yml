@@ -21,7 +21,11 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-      - name: Install dependencies
+      - name: Install system fonts (Noto Sans CJK for Pillow)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+      - name: Install Python dependencies
         run: pip install -r requirements.txt
       - name: Run PV post
         env:

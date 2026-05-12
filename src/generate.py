@@ -1,14 +1,43 @@
 """
-generate.py - Gemini で要約+画像プロンプト+画像を生成
-The Rundown AI 型: 親ポストに画像、自リプライにソースURL
-画像路線: 夜景 × 歩き × 低めアングル × 高級ファッション写真
+generate.py - Gemini で要約+俳句+イラスト画像を生成
+イラスト型: New Yorker satirical cartoon 風イラスト + 下部に 5-7-5 俳句オーバーレイ
 PV関連性判定: 記事がPV/医薬品と無関係なら投稿スキップ
 """
 import os
+import io
+import json
+import re
 import yaml
-import google.generativeai as genai
+from pathlib import Path
+from typing import Optional
+
+from google import genai
+from google.genai import types
+from PIL import Image, ImageDraw, ImageFont
 
 
+# ============================================================
+# Pillow 描画設定
+# ============================================================
+IMAGE_W = 1200
+IMAGE_H = 675
+STRIP_RATIO = 0.62  # 下部俳句帯の開始位置 (画像高さに対する比)
+
+NOTO_FONT_PATHS = [
+    # Ubuntu (GitHub Actions runner) — apt: fonts-noto-cjk
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Bold.otf",
+    "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc",
+    # Windows ローカル開発フォールバック
+    r"C:\Windows\Fonts\NotoSansJP-VF.ttf",
+    r"C:\Windows\Fonts\YuGothB.ttc",
+]
+
+
+# ============================================================
+# 設定読み込み
+# ============================================================
 def load_character(config_path: str = "config/character.yml") -> dict:
     with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -16,142 +45,55 @@ def load_character(config_path: str = "config/character.yml") -> dict:
 
 def classify_news_category(entry: dict) -> str:
     text = f"{entry.get('title', '')} {entry.get('summary', '')} {entry.get('source_name', '')}".lower()
-    
+
     ai_kw = ["ai", "人工知能", "機械学習", "machine learning", "llm", "生成ai",
              "generative", "automation", "自動化", "デジタル", "dx"]
     if any(kw in text for kw in ai_kw):
         return "ai_tech"
-    
+
     reg_kw = ["guidance", "guideline", "ガイダンス", "ガイドライン", "regulation",
               "規制", "fda", "ema", "pmda", "ich", "cioms", "通達", "通知", "発出",
               "gvp", "薬機法"]
     if any(kw in text for kw in reg_kw):
         return "regulatory"
-    
+
     market_kw = ["市場", "market", "億円", "億ドル", "billion", "million", "成長",
                  "growth", "シェア", "買収", "acquisition", "提携", "契約",
                  "戦略", "組織", "再編", "アウトソース"]
     if any(kw in text for kw in market_kw):
         return "market_business"
-    
+
     china_kw = ["中国", "nmpa", "cde", "china"]
     if any(kw in text for kw in china_kw):
         return "china"
-    
+
     return "general"
 
 
-def get_image_style_for_category(category: str) -> str:
-    """
-    画像スタイル: 夜景 × 歩き × 低めアングル × 高級ファッション写真
-    """
-def get_image_style_for_category(category: str) -> str:
-    """
-    画像スタイル: リアル寄せ強化版
-    """
-
-    base_style = """
-STYLE:
-Ultra-photorealistic cinematic studio photography.
-Looks like a real high-end editorial photograph shot with a full-frame cinema camera.
-Natural skin pores, subtle skin texture, realistic facial asymmetry, realistic hair strands,
-real fabric wrinkles, believable body proportions, realistic hands and fingers.
-No plastic skin, no doll-like face, no AI-glossy texture, no over-smoothed beauty filter.
-NOT anime, NOT manga, NOT illustration, NOT 3D render, NOT cosplay poster.
-
-SUBJECT:
-A single East Asian woman, appears to be 18 years old or younger. She has a fresh, youthful, yet intelligent and confident original face.
-She has an original face and must not resemble any real celebrity, model, public figure,
-anime character, game character, or fictional character.
-Her expression is a glowing, mischievous, full, heartwarming smile. Her eyes are wide, bright, and focused intensely on the camera from her downward perspective.
-
-WARDROBE:
-A refined fashion outfit inspired by Japanese sailor-uniform design,
-reinterpreted as an adult editorial fashion look.
-Elegant, neat, tailored, modest, and non-explicit.
-No fetish styling, no overly short skirt, no exposed underwear.
-
-POSE:
-The subject is leaning down close toward the camera, peering down into the lens. Her head is tilted slightly. Because of the extreme low camera angle, she is looking down with large, "upturned eyes" (uwame-ukai) directly at the viewer. Her shoulders are prominent in the foreground.
-
-CAMERA:
-Aspect ratio: 16:9 landscape.
-Shot on an 85mm lens, full-frame camera, shallow depth of field.
-Extreme close-up shot (head and shoulders only). Camera is at an extremely low angle, looking sharply upward at the subject. Subject's face dominates the frame, occupying 80-90%.
-
-LIGHTING:
-Soft cinematic lighting.
-Cool blue rim light + soft key light on the face.
-Realistic reflections on glass and lab equipment.
-Natural shadow falloff.
-
-BACKGROUND:
-Modern pharmaceutical AI laboratory at night.
-Glass walls, city skyline, lab benches, beakers, sealed document folders.
-Holographic-style panels (no readable text).
-No logos, no letters, no numbers.
-
-REALISM REQUIREMENTS:
-Photorealistic original human face.
-Realistic eyes with natural catchlights.
-Correct anatomy, realistic hands, natural pose.
-Professional cinematic color grading.
-
-ABSOLUTE PROHIBITIONS:
-No minors.
-No anime, manga, cartoon, illustration, 3D rendering.
-No readable text, no letters, no numbers, no logos.
-No multiple people.
-""".strip()
-
-    category_scenes = {
-        "regulatory": """
-CATEGORY SCENE:
-Subtle regulatory atmosphere with sealed document folders and corporate glass interiors.
-The subject appears to be leaving a high-level regulatory meeting.
-""".strip(),
-
-        "ai_tech": """
-CATEGORY SCENE:
-Futuristic pharmaceutical AI environment with abstract data panels and lab equipment.
-No readable text.
-""".strip(),
-
-        "market_business": """
-CATEGORY SCENE:
-Luxury corporate environment with high-rise buildings and executive interiors.
-""".strip(),
-
-        "china": """
-CATEGORY SCENE:
-Modern East Asian biotech city environment with glass research facilities.
-""".strip(),
-
-        "general": """
-CATEGORY SCENE:
-Modern pharmaceutical business environment at night.
-Clean, cinematic, professional atmosphere.
-""".strip(),
-    }
-
-    return f"{base_style}\n\n{category_scenes.get(category, category_scenes['general'])}"
+# ============================================================
+# Gemini クライアント
+# ============================================================
+def _get_client() -> genai.Client:
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY environment variable is not set")
+    return genai.Client(api_key=api_key)
 
 
+# ============================================================
+# 投稿テキスト (summary) + 俳句 を生成するためのプロンプト
+# ============================================================
 def build_prompt(entry: dict, character: dict) -> str:
     char = character["character"]
-    category = classify_news_category(entry)
-    image_style = get_image_style_for_category(category)
-    
+
     prompt = f"""あなたは「{char['name']}」というキャラクターです。
 PVニュースのXポスト用に、読者の手を止める日本語要約と、
-雑誌表紙のような画像プロンプトを生成してください。
+ニュースの本質を切り取る 5-7-5 俳句を生成してください。
 
 【キャラクター設定】
 - 名前: {char['name']}
 - 性格: {", ".join(char['personality'])}
 - スタイル: 静かに本質を見抜くPVコンサルの視点。データと業界知見で語る
-
-【今回のニュースカテゴリ】 {category}
 
 【最初の判定 - 極めて重要】
 このニュースが「PV(医薬品安全性監視)/医薬品/製薬業界」と
@@ -187,7 +129,7 @@ PVに関係ある場合(is_pv_related=true):
 {{
   "is_pv_related": true,
   "summary": "120-180字、フックのある日本語要約",
-  "image_prompt": "180-260 words、英語の画像プロンプト"
+  "haiku": ["上句", "中句", "下句"]
 }}
 
 【summary 設計指針(is_pv_related=true の時のみ)- 極めて重要】
@@ -222,22 +164,12 @@ summary には、原文に明示的に書かれている事実だけを記述す
   is_pv_related=false で返すこと。これが最も重要。
 - 個別の医療行為アドバイス(「○○を服用すべき」「投与中止」など)は禁止。
 
-【image_prompt 設計指針】
-ニュース内容を視覚化するため、3ステップを実行する:
-ステップ1: ニュースから具体的なオブジェクトを5つ以上抽出
-ステップ2: 人物が何をしている瞬間かを決める
-ステップ3: ステップ1とステップ2を組み合わせて image_prompt を書く
-
-スタイル指示(必ず以下の内容を image_prompt に含めること):
-{image_style}
-
-【image_prompt 必須要件】
-- 具体的なオブジェクトを3つ以上、画像内に配置
-- 「抽象的」「シンボリック」だけで終わらせず、具体的に何が映るかを書く
-- Aspect ratio: 16:9 landscape
-- Photorealistic original human face required
-- NO text, NO letters, NO numbers, NO logos
-- Length: 100-150 English words
+【haiku 設計指針】
+- 3行 (上句 / 中句 / 下句) の俳句で記事本質を切り取る
+- 目安は 5モーラ / 7モーラ / 5モーラ。拗音 (きゃ等) は1モーラ、促音と長音も1モーラ。
+  厳密でなくとも良いが、各句は短く独立して読める形にすること。
+- 季語不要、観察的・編集的視点
+- summary と同じハルシネーション制約に従い、原文にない固有名詞・数値は使わない
 
 【原文情報】
 タイトル: {entry['title']}
@@ -251,43 +183,42 @@ summary には、原文に明示的に書かれている事実だけを記述す
 
 
 def generate_post_content(entry: dict, character: dict) -> dict:
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY environment variable is not set")
-    
-    genai.configure(api_key=api_key)
-    
-    model = genai.GenerativeModel(
-        "gemini-2.5-flash",
-        generation_config={
-            "temperature": 0.85,
-            "top_p": 0.95,
-            "max_output_tokens": 4000,
-            "response_mime_type": "application/json",
-        },
-    )
-    
+    client = _get_client()
     prompt = build_prompt(entry, character)
-    response = model.generate_content(prompt)
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=0.85,
+            top_p=0.95,
+            max_output_tokens=4000,
+            response_mime_type="application/json",
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+        ),
+    )
     text = response.text.strip()
-    
-    import json
-    import re
     text = re.sub(r"^```(?:json)?\s*", "", text)
     text = re.sub(r"\s*```$", "", text)
-    
+
     try:
         result = json.loads(text)
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Failed to parse Gemini JSON output: {e}\nRaw: {text}")
-    
+
     if result.get("is_pv_related") is False:
         skip_reason = result.get("skip_reason", "PVと無関係と判定")
         raise PVNotRelatedError(f"Skipped: {skip_reason}")
-    
-    if "summary" not in result or "image_prompt" not in result:
+
+    if "summary" not in result or "haiku" not in result:
         raise RuntimeError(f"Gemini output missing required fields: {result}")
-    
+
+    haiku = result["haiku"]
+    if not isinstance(haiku, list) or len(haiku) != 3:
+        raise RuntimeError(f"haiku must be a list of 3 strings: {haiku}")
+    if not all(isinstance(line, str) and line.strip() for line in haiku):
+        raise RuntimeError(f"haiku lines must be non-empty strings: {haiku}")
+
     result["_category"] = classify_news_category(entry)
     return result
 
@@ -297,13 +228,16 @@ class PVNotRelatedError(Exception):
     pass
 
 
+# ============================================================
+# ハッシュタグ・親ポスト本文 (変更なし)
+# ============================================================
 def select_hashtags(entry: dict, character: dict) -> list:
     hashtags_config = character["hashtags"]
     tags = list(hashtags_config["always"])
-    
+
     matched_lower = [kw.lower() for kw in entry.get("matched_keywords", [])]
     text = f"{entry['title']} {entry['summary']}".lower()
-    
+
     if any(x in text for x in ["ai", "artificial intelligence", "machine learning", "llm"]):
         tags.extend(hashtags_config["conditional"]["ai"][:1])
     if any(x in matched_lower for x in ["guidance", "guideline", "fda approval", "ema approval", "ich"]):
@@ -314,7 +248,7 @@ def select_hashtags(entry: dict, character: dict) -> list:
         tags.extend(hashtags_config["conditional"]["icsr"][:1])
     if "pmda" in entry["source_name"].lower() or "pmda" in text:
         tags.extend(hashtags_config["conditional"]["pmda"][:1])
-    
+
     seen = set()
     unique_tags = []
     for t in tags:
@@ -323,7 +257,7 @@ def select_hashtags(entry: dict, character: dict) -> list:
             unique_tags.append(t)
         if len(unique_tags) >= 4:
             break
-    
+
     unique_tags.append(character["ai_disclosure"])
     return unique_tags
 
@@ -336,11 +270,11 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
     hashtags_str = " ".join(tags)
     summary = gen["summary"]
     max_total = character.get("max_chars", 278)
-    
+
     full_post = f"{summary}\n\n{hashtags_str}"
     if len(full_post) <= max_total:
         return full_post
-    
+
     minimal_tags = " ".join([
         character["hashtags"]["always"][0],
         character["hashtags"]["always"][1],
@@ -349,7 +283,7 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
     minimal_post = f"{summary}\n\n{minimal_tags}"
     if len(minimal_post) <= max_total:
         return minimal_post
-    
+
     overhead = len(f"\n\n{minimal_tags}")
     allowed_summary = max_total - overhead
     if allowed_summary > 1:
@@ -357,43 +291,166 @@ def compose_post(entry: dict, gen: dict, character: dict) -> str:
     return f"{summary}\n\n{minimal_tags}"
 
 
-def generate_image(image_prompt: str, output_path: str = "/tmp/post_image.png") -> str:
-    """
-    Gemini 2.5 Flash Image で画像生成
-    """
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("[image] GEMINI_API_KEY not set, skipping image generation")
+# ============================================================
+# 画像生成: 俳句 → イラストプロンプト → Gemini Image → Pillow 合成
+# ============================================================
+_STYLE_LOCK = (
+    "editorial illustration in the style of The New Yorker cover art, "
+    "satirical cartoon, limited color palette of 2 to 4 muted colors, "
+    "flat colors, hand-drawn line work, slightly textured paper feel"
+)
+_EXTRA_PROHIBIT = (
+    "NO photo-realism, NO 3D CG, NO anime, NO manga, NO stock illustration look. "
+    "Use only abstract, universal metaphors. Politically neutral composition"
+)
+
+
+def _build_image_prompt_request(haiku: list) -> str:
+    return f"""You are commissioning a magazine cover illustration based on a Japanese haiku.
+
+The haiku:
+Line 1: {haiku[0]}
+Line 2: {haiku[1]}
+Line 3: {haiku[2]}
+
+Style:
+{_STYLE_LOCK}
+
+Requirements:
+1. Begin the image_prompt with this exact style string:
+   "{_STYLE_LOCK}"
+2. Include "16:9 landscape composition"
+3. Composition must visually express the imagery and metaphor of the haiku above.
+4. Stylized silhouette figures only for any humans; faces without realistic detail.
+5. End with this exact prohibition block:
+   "NO readable text, NO letters, NO numbers, NO logos, NO real brand names,
+   NO real persons, NO national flags, NO political symbols, NO maps with country borders.
+   {_EXTRA_PROHIBIT}."
+6. 100-180 English words.
+
+Output the image_prompt body only. No JSON, no markdown, no explanation."""
+
+
+def _gen_image_prompt_from_haiku(client: genai.Client, haiku: list) -> str:
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=_build_image_prompt_request(haiku),
+        config=types.GenerateContentConfig(
+            temperature=0.85,
+            max_output_tokens=6000,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+        ),
+    )
+    return response.text.strip()
+
+
+def _gen_image_bytes(client: genai.Client, image_prompt: str) -> Optional[Image.Image]:
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-image",
+        contents=image_prompt,
+        config=types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(aspect_ratio="16:9"),
+        ),
+    )
+    if not response.candidates:
         return None
-    
+    cand = response.candidates[0]
+    if not cand.content or not cand.content.parts:
+        return None
+    for part in cand.content.parts:
+        if part.inline_data and part.inline_data.data:
+            img = Image.open(io.BytesIO(part.inline_data.data)).convert("RGBA")
+            return img.resize((IMAGE_W, IMAGE_H), Image.LANCZOS)
+    return None
+
+
+def _find_font_path() -> str:
+    for p in NOTO_FONT_PATHS:
+        if os.path.exists(p):
+            return p
+    raise RuntimeError(
+        "No CJK font found. Install fonts-noto-cjk (Ubuntu) "
+        f"or place a Noto Sans JP file. Tried: {NOTO_FONT_PATHS}"
+    )
+
+
+def _load_font(size: int) -> ImageFont.FreeTypeFont:
+    path = _find_font_path()
+    f = ImageFont.truetype(path, size)
     try:
-        from google import genai as new_genai
-        from google.genai import types
-        
-        client = new_genai.Client(api_key=api_key)
-        
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=image_prompt,
-            config=types.GenerateContentConfig(
-                response_modalities=["IMAGE"],
-                image_config=types.ImageConfig(
-                    aspect_ratio="16:9",
-                ),
-            ),
-        )
-        
-        for part in response.parts:
-            if part.inline_data and part.inline_data.data:
-                image_bytes = part.inline_data.data
-                with open(output_path, "wb") as f:
-                    f.write(image_bytes)
-                print(f"[image] Saved to {output_path} ({len(image_bytes)} bytes)")
-                return output_path
-        
-        print("[image] No image data in response")
+        f.set_variation_by_name("Bold")
+    except Exception:
+        pass
+    return f
+
+
+def _compose_with_haiku(illust: Image.Image, haiku: list) -> Image.Image:
+    """イラストの下部にグラデーション帯を重ね、3行の俳句を白文字で配置。"""
+    canvas = illust.copy()
+    W, H = canvas.size
+    strip_top = int(H * STRIP_RATIO)
+
+    layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    ld = ImageDraw.Draw(layer)
+    for y in range(strip_top, H):
+        alpha = int(200 * ((y - strip_top) / (H - strip_top)))
+        ld.line([(0, y), (W, y)], fill=(8, 8, 12, alpha))
+    canvas = Image.alpha_composite(canvas, layer)
+
+    d = ImageDraw.Draw(canvas)
+    font = _load_font(42)
+    line_h = 56
+    total_h = line_h * 3
+    y0 = strip_top + ((H - strip_top) - total_h) // 2
+    for i, line in enumerate(haiku):
+        tw = d.textlength(line, font=font)
+        d.text(((W - tw) // 2, y0 + i * line_h), line,
+               fill=(252, 248, 232, 255), font=font)
+    return canvas
+
+
+def generate_image(haiku: list, output_path: str = "/tmp/post_image.png") -> Optional[str]:
+    """
+    俳句から画像を生成する。
+    1. Gemini Flash で俳句に基づく英語イラストプロンプトを生成
+    2. Gemini 2.5 Flash Image でイラスト描画
+    3. Pillow で下部に俳句オーバーレイ
+    成功時は output_path を返す。失敗 (セーフティブロック等) は None。
+    """
+    if not haiku or not isinstance(haiku, list) or len(haiku) != 3:
+        print(f"[image] invalid haiku input: {haiku}")
         return None
-    
+
+    try:
+        client = _get_client()
+    except RuntimeError as e:
+        print(f"[image] {e}")
+        return None
+
+    try:
+        image_prompt = _gen_image_prompt_from_haiku(client, haiku)
+        print(f"[image] prompt[:140]: {image_prompt[:140]}...")
     except Exception as e:
-        print(f"[image] Generation failed: {e}")
+        print(f"[image] image_prompt generation failed: {e}")
+        return None
+
+    try:
+        illust = _gen_image_bytes(client, image_prompt)
+    except Exception as e:
+        print(f"[image] image generation failed: {e}")
+        return None
+
+    if illust is None:
+        print("[image] empty response from image model (possible safety filter)")
+        return None
+
+    try:
+        final = _compose_with_haiku(illust, haiku)
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        final.convert("RGB").save(output_path, "PNG")
+        print(f"[image] Saved to {output_path}")
+        return output_path
+    except Exception as e:
+        print(f"[image] composition failed: {e}")
         return None
