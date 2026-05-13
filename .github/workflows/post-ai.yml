@@ -1,11 +1,8 @@
 name: AI News Auto Post (ai)
 
 on:
-  schedule:
-    # AI ニュース投稿は新規アカウントの Bot 判定回避のため 1 日 1 回に絞る
-    # (運用書 Step 13.7 / 付録 C: 新規 X アカウントの 403 Forbidden 対策)
-    # 朝 08:07 JST → 前夜の US AI ラボ発信を翌朝に拾うのに適する
-    - cron: '7 23 * * *'    # 朝 08:07 JST (前日 UTC)
+  # 注: GitHub Actions schedule は本 repo で 4/26 以降発火しない問題があり、
+  # cron-job.org からの workflow_dispatch 運用に戻している。
   workflow_dispatch:
     inputs:
       dry_run:
