@@ -1,12 +1,8 @@
 name: PV Consul Nyanko Auto Post (nyanko)
 
 on:
-  schedule:
-    # 運用マニュアル v4 §13.4 のスケジュール (UTC 指定)
-    # ※ GitHub Actions の :00/:30 ホットアワー回避のため :07 / :37 にずらしている
-    - cron: '7 23 * * *'    # 朝 08:07 JST (前日 UTC)
-    - cron: '37 3 * * *'    # 昼 12:37 JST
-    - cron: '7 12 * * *'    # 夜 21:07 JST
+  # 注: GitHub Actions schedule は本 repo で 4/26 以降発火しない問題があり、
+  # cron-job.org からの workflow_dispatch 運用に戻している (運用マニュアル §8.1 改)。
   workflow_dispatch:
     inputs:
       dry_run:
