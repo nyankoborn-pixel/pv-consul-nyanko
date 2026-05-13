@@ -1,8 +1,11 @@
 name: AI News Auto Post (ai)
 
 on:
-  # 注: GitHub Actions schedule は本 repo で 4/26 以降発火しない問題があり、
-  # cron-job.org からの workflow_dispatch 運用に戻している。
+  schedule:
+    # 運用マニュアル v4 §13.4 のスケジュール (UTC 指定、nyanko と同じ 3 回/日)
+    - cron: '7 23 * * *'    # 朝 08:07 JST
+    - cron: '37 3 * * *'    # 昼 12:37 JST
+    - cron: '7 12 * * *'    # 夜 21:07 JST
   workflow_dispatch:
     inputs:
       dry_run:
