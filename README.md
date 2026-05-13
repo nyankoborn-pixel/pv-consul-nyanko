@@ -83,7 +83,9 @@ python src/main.py
 
 ```
 pv-consul-nyanko/
-├── .github/workflows/post.yml    # スケジューラ
+├── .github/workflows/
+│   ├── post-nyanko.yml           # ニャンコ アカウント投稿 (朝/昼/夜)
+│   └── post-ai.yml               # AI ニュース アカウント投稿 (朝のみ)
 ├── src/
 │   ├── main.py                    # オーケストレーター
 │   ├── fetch_news.py              # RSS収集
@@ -112,7 +114,11 @@ pv-consul-nyanko/
 `config/character.yml` の `style_guidelines` / `forbidden` を編集。
 
 ### 投稿時刻変更
-`.github/workflows/post.yml` の cron 式を編集。**UTC指定であることに注意**。
+本リポジトリは GitHub Actions schedule が安定発火しない問題があり、
+**cron-job.org からの workflow_dispatch 運用**(以前の構成)に戻している。
+時刻変更は cron-job.org の管理画面で実施する。
+(`.github/workflows/post-nyanko.yml` / `post-ai.yml` には schedule 記述無し、
+ `workflow_dispatch` トリガのみ定義)
 
 ## 制限事項・注意点
 
