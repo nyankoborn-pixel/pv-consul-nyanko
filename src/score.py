@@ -7,6 +7,7 @@ score.py - ニュース記事のスコアリング
 """
 import json
 import re
+import unicodedata
 import yaml
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -17,6 +18,25 @@ from paths import POSTED_LOG, KEYWORDS_YML
 
 MIN_SUMMARY_LENGTH = 100
 
+# 末尾のソース表記を剥がすためのセパレータ
+# NFKC 後は ／→/, ｜→| になるので半角の '-' '|' '/' '—' '–' を対象にする。
+_TITLE_TAIL_SEP = re.compile(r"\s*[\-|/—–]\s*[^\-|/—–]+$")
+
+
+def normalize_title(title: str) -> str:
+    """
+    タイトル重複判定用の正規化:
+    - NFKC 統一 (全角英数→半角、機種依存合字解体)
+    - 末尾のソース表記 (" - 日経..." / "／PMDA" 等) を 1 回剥がす
+    - 全空白除去・小文字化
+    """
+    if not title:
+        return ""
+    s = unicodedata.normalize("NFKC", title)
+    s = _TITLE_TAIL_SEP.sub("", s, count=1)
+    s = re.sub(r"\s+", "", s)
+    return s.lower()
+
 
 def load_keywords(config_path: str = KEYWORDS_YML) -> list:
     with open(config_path, "r", encoding="utf-8") as f:
@@ -24,18 +44,34 @@ def load_keywords(config_path: str = KEYWORDS_YML) -> list:
     return data.get("high_impact", [])
 
 
-def load_posted_links() -> set:
+def load_posted_signatures() -> tuple[set, set]:
+    """
+    過去の投稿履歴を読み込み、(リンク集合, 正規化タイトル集合) を返す。
+    Google News の RSS リンクはアクセス毎にパラメータが変わるため、
+    タイトル正規化で同記事を検出する 2 段判定にしている。
+    """
     if not POSTED_LOG.exists():
-        return set()
+        return set(), set()
     links = set()
+    titles = set()
     with open(POSTED_LOG, "r", encoding="utf-8") as f:
         for line in f:
             try:
                 rec = json.loads(line)
-                if "link" in rec:
-                    links.add(rec["link"])
             except json.JSONDecodeError:
                 continue
+            if rec.get("link"):
+                links.add(rec["link"])
+            t = rec.get("title", "")
+            nt = normalize_title(t)
+            if nt:
+                titles.add(nt)
+    return links, titles
+
+
+# 後方互換のためエイリアス保持
+def load_posted_links() -> set:
+    links, _ = load_posted_signatures()
     return links
 
 
@@ -84,11 +120,12 @@ def is_summary_too_short(entry: dict) -> bool:
 
 def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
     keywords = load_keywords(config_path)
-    posted_links = load_posted_links()
+    posted_links, posted_titles = load_posted_signatures()
 
     scored = []
     excluded_count = {
-        "posted": 0,
+        "posted_link": 0,
+        "posted_title": 0,
         "negative_score": 0,
         "too_old": 0,
         "too_short": 0,
@@ -97,7 +134,12 @@ def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
     for entry in entries:
         link = entry.get("link", "")
         if link in posted_links:
-            excluded_count["posted"] += 1
+            excluded_count["posted_link"] += 1
+            continue
+
+        norm_title = normalize_title(entry.get("title", ""))
+        if norm_title and norm_title in posted_titles:
+            excluded_count["posted_title"] += 1
             continue
 
         if is_summary_too_short(entry):
@@ -133,7 +175,13 @@ def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
     scored.sort(key=lambda x: x["score"], reverse=True)
 
     print(f"[score] Scored: {len(scored)} entries")
-    print(f"[score] Excluded: posted={excluded_count['posted']}, negative_score={excluded_count['negative_score']}, too_old={excluded_count['too_old']}, too_short={excluded_count['too_short']}")
+    print(
+        f"[score] Excluded: posted_link={excluded_count['posted_link']}, "
+        f"posted_title={excluded_count['posted_title']}, "
+        f"negative_score={excluded_count['negative_score']}, "
+        f"too_old={excluded_count['too_old']}, "
+        f"too_short={excluded_count['too_short']}"
+    )
 
     return scored
 
