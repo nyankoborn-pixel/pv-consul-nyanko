@@ -1,10 +1,15 @@
-# 会員専用記事の除外設定
+# 会員専用記事の除外設定 + 完全ブロック設定
 #
-# 仕組み:
-# - restricted_domains に登録されたドメインの記事については、
-#   要約(summary)の文字数が min_summary_length 未満なら会員限定記事と推定して除外する
-# - リストにないドメインは通常通り処理(文字数チェックなし)
-# - これにより、同じドメイン内で全文公開記事は通し、会員限定記事だけ除外できる
+# (1) restricted_domains
+#   - 登録ドメインの記事については、要約(summary)の文字数が min_summary_length 未満なら
+#     会員限定記事と推定して除外する。リストにないドメインは通常通り処理。
+#
+# (2) blocked_domains
+#   - ここに登録したドメインの記事は無条件で除外する(掲示板・低品質まとめ等)。
+#
+# (3) blocked_title_patterns
+#   - title が下記の正規表現のいずれかにマッチしたら無条件で除外する。
+#     セミナー告知 / 回顧記事 / 掲示板リンク を排除する用途。
 
 restricted_domains:
   - pnb.jiho.jp        # 時事通信ファーマ
@@ -14,3 +19,29 @@ restricted_domains:
   - nikkei.com         # 日経電子版
 
 min_summary_length: 350
+
+blocked_domains:
+  - finance.yahoo.co.jp     # Yahoo!ファイナンス掲示板系
+  - textream.yahoo.co.jp    # 旧 textream
+  - 5ch.net                 # 5ちゃんねる
+  - bbs.kakaku.com          # 価格.com 掲示板
+
+blocked_title_patterns:
+  # 掲示板系
+  - "掲示板"
+  # セミナー・ウェビナー・説明会告知 (PR TIMES 等から混入)
+  - "セミナー"
+  - "ウェビナー"
+  - "ウェビナ"
+  - "説明会"
+  - "勉強会"
+  - "オンライン講座"
+  # 「【6/8公開】」「【公開予定】」等のプレスリリース広告
+  - "【[0-9]+/[0-9]+\\s*公開】"
+  - "【公開】"
+  - "公開予定"
+  # 回顧記事・特集 (recency 判定をすり抜ける古いネタ)
+  - "[0-9]+年前"
+  - "を振り返る"
+  - "あの時"
+  - "あのとき"

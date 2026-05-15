@@ -15,12 +15,29 @@ from pathlib import Path
 from dateutil import parser as date_parser
 
 from paths import POSTED_LOG, KEYWORDS_YML
+from filter_restricted import is_blocked_domain, is_blocked_title
 
 MIN_SUMMARY_LENGTH = 100
+
+# 直近 N 日以内に同じ固有名詞・コードが登場した記事は除外する
+ENTITY_DEDUPE_WINDOW_DAYS = 5
 
 # 末尾のソース表記を剥がすためのセパレータ
 # NFKC 後は ／→/, ｜→| になるので半角の '-' '|' '/' '—' '–' を対象にする。
 _TITLE_TAIL_SEP = re.compile(r"\s*[\-|/—–]\s*[^\-|/—–]+$")
+
+# 固有名詞・コード抽出パターン
+# - 大文字始まりの英数字列 (GPT-5, OBP-301, OpenAI, NVIDIA, F351 等)
+# - 3〜5 桁の独立した数字列 (株式コード等)
+_ENTITY_RE = re.compile(r"[A-Z][A-Za-z0-9\-]{2,}|\b\d{3,5}\b")
+
+# 業界共通すぎるトークンは entity 扱いしない (これで dedup すると正常な複数記事を弾く)
+_ENTITY_STOPWORDS = {
+    "FDA", "EMA", "PMDA", "ICH", "GVP", "PV", "AI", "DX", "LLM", "GPT",
+    "RMP", "PSUR", "PBRER", "DSUR", "ICSR", "RWD", "NMPA", "CDE",
+    "EU", "US", "UK", "JP", "CN", "AIDS", "DNA", "RNA",
+    "API", "RPA", "SaaS", "CEO", "CTO", "CFO", "CIO",
+}
 
 
 def normalize_title(title: str) -> str:
@@ -44,16 +61,32 @@ def load_keywords(config_path: str = KEYWORDS_YML) -> list:
     return data.get("high_impact", [])
 
 
-def load_posted_signatures() -> tuple[set, set]:
+def extract_entities(text: str) -> set:
     """
-    過去の投稿履歴を読み込み、(リンク集合, 正規化タイトル集合) を返す。
-    Google News の RSS リンクはアクセス毎にパラメータが変わるため、
-    タイトル正規化で同記事を検出する 2 段判定にしている。
+    タイトル等から固有名詞・コード(GPT-5, F351, OpenAI 等)を抽出。
+    NFKC 正規化したうえで _ENTITY_RE にマッチするトークンを集める。
+    業界共通すぎる略語 (FDA / PMDA / LLM 等) はストップワード扱いで除外。
+    """
+    if not text:
+        return set()
+    s = unicodedata.normalize("NFKC", text)
+    found = set(_ENTITY_RE.findall(s))
+    return {e for e in found if e.upper() not in _ENTITY_STOPWORDS}
+
+
+def load_posted_signatures() -> tuple[set, set, dict]:
+    """
+    過去の投稿履歴を読み込み、以下 3 つを返す:
+      - links: 全投稿のリンク集合
+      - titles: 全投稿の正規化タイトル集合
+      - entity_recent: 直近 ENTITY_DEDUPE_WINDOW_DAYS 日に登場した固有名詞集合
     """
     if not POSTED_LOG.exists():
-        return set(), set()
+        return set(), set(), set()
     links = set()
     titles = set()
+    entity_recent = set()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=ENTITY_DEDUPE_WINDOW_DAYS)
     with open(POSTED_LOG, "r", encoding="utf-8") as f:
         for line in f:
             try:
@@ -66,12 +99,22 @@ def load_posted_signatures() -> tuple[set, set]:
             nt = normalize_title(t)
             if nt:
                 titles.add(nt)
-    return links, titles
+            # 直近 window 内の投稿のみ entity に追加
+            ts_str = rec.get("timestamp", "")
+            try:
+                ts = datetime.fromisoformat(ts_str)
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
+            except (ValueError, TypeError):
+                continue
+            if ts >= cutoff:
+                entity_recent |= extract_entities(t)
+    return links, titles, entity_recent
 
 
 # 後方互換のためエイリアス保持
 def load_posted_links() -> set:
-    links, _ = load_posted_signatures()
+    links, _, _ = load_posted_signatures()
     return links
 
 
@@ -120,12 +163,15 @@ def is_summary_too_short(entry: dict) -> bool:
 
 def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
     keywords = load_keywords(config_path)
-    posted_links, posted_titles = load_posted_signatures()
+    posted_links, posted_titles, recent_entities = load_posted_signatures()
 
     scored = []
     excluded_count = {
         "posted_link": 0,
         "posted_title": 0,
+        "recent_entity": 0,
+        "blocked_domain": 0,
+        "blocked_title": 0,
         "negative_score": 0,
         "too_old": 0,
         "too_short": 0,
@@ -133,13 +179,29 @@ def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
 
     for entry in entries:
         link = entry.get("link", "")
+        title = entry.get("title", "")
+
+        if link and is_blocked_domain(link):
+            excluded_count["blocked_domain"] += 1
+            continue
+
+        if title and is_blocked_title(title):
+            excluded_count["blocked_title"] += 1
+            continue
+
         if link in posted_links:
             excluded_count["posted_link"] += 1
             continue
 
-        norm_title = normalize_title(entry.get("title", ""))
+        norm_title = normalize_title(title)
         if norm_title and norm_title in posted_titles:
             excluded_count["posted_title"] += 1
+            continue
+
+        # 固有名詞による直近 N 日 dedup
+        entities = extract_entities(title)
+        if entities & recent_entities:
+            excluded_count["recent_entity"] += 1
             continue
 
         if is_summary_too_short(entry):
@@ -176,8 +238,12 @@ def score_entries(entries: list, config_path: str = KEYWORDS_YML) -> list:
 
     print(f"[score] Scored: {len(scored)} entries")
     print(
-        f"[score] Excluded: posted_link={excluded_count['posted_link']}, "
+        "[score] Excluded: "
+        f"blocked_domain={excluded_count['blocked_domain']}, "
+        f"blocked_title={excluded_count['blocked_title']}, "
+        f"posted_link={excluded_count['posted_link']}, "
         f"posted_title={excluded_count['posted_title']}, "
+        f"recent_entity={excluded_count['recent_entity']}, "
         f"negative_score={excluded_count['negative_score']}, "
         f"too_old={excluded_count['too_old']}, "
         f"too_short={excluded_count['too_short']}"

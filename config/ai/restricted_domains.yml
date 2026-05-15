@@ -1,4 +1,4 @@
-# 会員専用記事の除外設定 (AI アカウント)
+# 会員専用記事の除外設定 + 完全ブロック設定 (AI アカウント)
 
 restricted_domains:
   - nikkei.com         # 日経電子版
@@ -8,3 +8,25 @@ restricted_domains:
   - bloomberg.co.jp    # Bloomberg
 
 min_summary_length: 350
+
+blocked_domains:
+  - finance.yahoo.co.jp
+  - textream.yahoo.co.jp
+  - 5ch.net
+  - bbs.kakaku.com
+
+blocked_title_patterns:
+  - "掲示板"
+  - "セミナー"
+  - "ウェビナー"
+  - "ウェビナ"
+  - "説明会"
+  - "勉強会"
+  - "オンライン講座"
+  - "【[0-9]+/[0-9]+\\s*公開】"
+  - "【公開】"
+  - "公開予定"
+  - "[0-9]+年前"
+  - "を振り返る"
+  - "あの時"
+  - "あのとき"
