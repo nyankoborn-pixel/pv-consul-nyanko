@@ -25,11 +25,21 @@ blocked_domains:
   - textream.yahoo.co.jp    # 旧 textream
   - 5ch.net                 # 5ちゃんねる
   - bbs.kakaku.com          # 価格.com 掲示板
+  # プレスリリース・PR 配信プラットフォーム (調査レポート販促が大半)
+  - newscast.jp
+  - prtimes.jp
+  - dreamnews.jp
+  - atpress.ne.jp
+  - value-press.com
+  - news2u.net
+  # 株主向け IR ニュース集約 (個別企業の決算/IR で報道ではない)
+  - kabu-ir.com
+  - kabushiki.jp
 
 blocked_title_patterns:
   # 掲示板系
   - "掲示板"
-  # セミナー・ウェビナー・説明会告知 (PR TIMES 等から混入)
+  # セミナー・ウェビナー・説明会告知
   - "セミナー"
   - "ウェビナー"
   - "ウェビナ"
@@ -40,6 +50,15 @@ blocked_title_patterns:
   - "【[0-9]+/[0-9]+\\s*公開】"
   - "【公開】"
   - "公開予定"
+  # 市場調査レポートの販促 ("○○市場規模は20XX年に X億ドルに達する見込み" 系)
+  - "市場規模"
+  - "市場は[^。]{0,40}に達する"
+  - "に達する見込み"
+  - "年平均成長率"
+  - "CAGR"
+  - "市場調査レポート"
+  - "市場レポート"
+  - "予測.*[0-9]{4}年"
   # 回顧記事・特集 (recency 判定をすり抜ける古いネタ)
   - "[0-9]+年前"
   - "を振り返る"

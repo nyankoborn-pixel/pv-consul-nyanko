@@ -14,6 +14,14 @@ blocked_domains:
   - textream.yahoo.co.jp
   - 5ch.net
   - bbs.kakaku.com
+  - newscast.jp
+  - prtimes.jp
+  - dreamnews.jp
+  - atpress.ne.jp
+  - value-press.com
+  - news2u.net
+  - kabu-ir.com
+  - kabushiki.jp
 
 blocked_title_patterns:
   - "掲示板"
@@ -26,6 +34,14 @@ blocked_title_patterns:
   - "【[0-9]+/[0-9]+\\s*公開】"
   - "【公開】"
   - "公開予定"
+  - "市場規模"
+  - "市場は[^。]{0,40}に達する"
+  - "に達する見込み"
+  - "年平均成長率"
+  - "CAGR"
+  - "市場調査レポート"
+  - "市場レポート"
+  - "予測.*[0-9]{4}年"
   - "[0-9]+年前"
   - "を振り返る"
   - "あの時"
